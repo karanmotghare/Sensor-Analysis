@@ -1,0 +1,48 @@
+{%load static%}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {%block fonts%}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    {%endblock%}
+    <link rel="stylesheet" href="{%static 'index.css' %}">
+
+    <title>Sensor Analysis</title>
+</head>
+<body>
+    {% block header%}
+    <header>
+        <p>Sensor Analysis</p>
+    </header>
+    {%endblock%}
+
+    <div class="login_form">
+        <form action="{%url 'indexPage'%}" method="get">
+
+            <div class="log_menu">
+                <select name="admin_opt" id="admin_list">
+                    <option id="opt" value="s_admin">Super Admin</option>
+                    <option id="opt" value="n_admin">Admin</option>
+
+                </select>
+            </div>
+
+           <div class="u_name">
+                <label for="username">Username</label>
+                <input type="text" name="username" id="u_name">
+           </div>
+
+           <div class="password">
+                <label for="password">Password</label>
+                <input type="password" name="password" id="pass">
+           </div>
+
+            <button type="submit" id="btn">Sign In</button>
+        </form>
+    </div>
+</body>
+</html>
