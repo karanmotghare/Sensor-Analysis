@@ -8,8 +8,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     {%block fonts%}
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    {%endblock%}
     <link rel="stylesheet" href="{%static 'index.css' %}">
+    {%endblock fonts%}
 
     <title>Sensor Analysis</title>
 </head>
@@ -18,10 +18,12 @@
     <header>
         <p>Sensor Analysis</p>
     </header>
-    {%endblock%}
+    {%endblock header%}
 
+    {%block form%}
     <div class="login_form">
-        <form action="{%url 'indexPage'%}" method="get">
+        <form action="{%url 'home'%}" method="POST">
+            {% csrf_token %}
 
             <div class="log_menu">
                 <select name="admin_opt" id="admin_list">
@@ -44,5 +46,11 @@
             <button type="submit" id="btn">Sign In</button>
         </form>
     </div>
+    {%endblock form%}
+    {% block body%}
+    <!-- {%block label%}
+    ninad
+    {%endblock label%} -->
+    {%endblock body%}
 </body>
 </html>

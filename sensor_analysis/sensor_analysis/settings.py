@@ -75,10 +75,16 @@ WSGI_APPLICATION = 'sensor_analysis.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
+
+#Below enter the USER,Password according to how you setup MYSQL and NAME will have database name that we have created in MYSQL
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'djangotest',
+        'USER': 'root',
+        'PASSWORD': 'MySQL@10',
+        'HOST':'localhost',
+        'PORT':'3306',
     }
 }
 
