@@ -15,6 +15,7 @@
 - Inside terminal run the code
     ```bash
     pip install mysqlclient
+    pip install pymysql
     ```
 - Once installed go to **settings.py** file in **sensor_analysis** directory and do the following changes ->
     ```python
