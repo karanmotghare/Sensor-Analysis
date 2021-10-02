@@ -38,7 +38,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'models_dir'
 ]
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -80,9 +82,9 @@ WSGI_APPLICATION = 'sensor_analysis.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'djangotest',
-        'USER': 'root',
-        'PASSWORD': 'MySQL@10',
+        'NAME': 'sensor_analysis',
+        'USER': 'project',
+        'PASSWORD': '123456',
         'HOST':'localhost',
         'PORT':'3306',
     }

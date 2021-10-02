@@ -11,46 +11,57 @@
     <link rel="stylesheet" href="{%static 'index.css' %}">
     {%endblock fonts%}
 
-    <title>Sensor Analysis</title>
+    <title>Add New User</title>
 </head>
 <body>
     {% block header%}
     <header>
-        <p>Sensor Analysis</p>
+        <p>Add New User</p>
     </header>
+    
     {%endblock header%}
 
     {%block form%}
     <div class="login_form">
-        <form action="{%url 'login' %}" method="POST">
+        <form action="{%url 'addUser' %}" method="POST">
             {% csrf_token %}
 
             <div class="log_menu">
-                <select name="admin_opt" id="admin_list">
-                    <option id="opt" value="s_admin" default>Super Admin</option>
-                    <option id="opt" value="n_admin">Admin</option>
+                <select name="org_opt" id="admin_list">
+
+                    {% for org in orgs %}
+                    <option id="opt" value={{org.org_id}}>{{org.org_name}}</option>
+                    {% endfor %}
 
                 </select>
             </div>
 
            <div class="u_name">
                 <label for="username">Username</label>
-                <input type="text" name="username" id="u_name" required>
+                <input type="text" name="username" id="u_name">
            </div>
 
            <div class="password">
                 <label for="password">Password</label>
-                <input type="password" name="password" id="pass" required>
+                <input type="password" name="password" id="pass">
            </div>
+
+           <div class="u_name">
+                <label for="position">Position</label>
+                <select name="post_opt" id="u_name">
+
+                    {% for post in roles %}
+                    <option id="post_opt" value={{post.value}}>{{post.name}}</option>
+                    {% endfor %}
+
+                </select>
+                
+            </div>
 
             <button type="submit" id="btn">Sign In</button>
         </form>
     </div>
     {%endblock form%}
-    {% block body%}
-    <!-- {%block label%}
-    ninad
-    {%endblock label%} -->
-    {%endblock body%}
+    
 </body>
 </html>
