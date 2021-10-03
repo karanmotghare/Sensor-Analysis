@@ -2,6 +2,7 @@
     margin: 0px;
     padding: 0px;
     border: 0px;
+    box-sizing: border-box;
 }
 
 body{
@@ -20,10 +21,48 @@ header p{
     font-size: 20px;
     color: #FDFEFE;
     letter-spacing: 1px;
-
     font-family: 'Open Sans', sans-serif;
 }
 
+.align-right{
+    text-align: right;
+    border: 0;
+    margin-right: 15px;
+}
+
+.headerbtn{
+    background-color: #0073DD;
+    color: white;
+    font-size: medium;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.headerbtn:hover{
+    background-color: #0021dd;
+    color: white;
+}
+
+.col {
+  float: left;
+  text-align: center ;
+  width: 25%;
+  padding: 10px;
+  height: 300px; /* Should be removed. Only for demonstration */
+}
+
+.col_log{
+    margin-top: 10px;
+}
+
+.row:after {
+  content: "";
+  display: table;
+  clear: both;
+}
 
 .login_form{
     height: auto;
