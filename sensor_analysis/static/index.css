@@ -26,7 +26,7 @@ header p{
 
 
 .login_form{
-    height: 350px;
+    height: auto;
     width: 250px;
     margin: 0 auto;
     margin-top: 100px;
@@ -81,7 +81,7 @@ header p{
 #btn{
     width: 100px;
     display: block;
-    height: 30px;
+    height: auto;
     padding: 5px;
     margin: 0 auto;
     border-radius: 5px;

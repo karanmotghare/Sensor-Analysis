@@ -1,0 +1,45 @@
+{%load static%}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {%block fonts%}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="stylesheet" href="{%static 'index.css' %}">
+    {%endblock fonts%}
+
+    <title>Add New Organisation</title>
+</head>
+<body>
+    {% block header%}
+    <header>
+        <p>Add New Organisation</p>
+    </header>
+    
+    {%endblock header%}
+
+    {%block form%}
+    <div class="login_form">
+        <form action="{%url 'addNewOrg' %}" method="POST">
+            {% csrf_token %}
+
+           <div class="u_name">
+                <label for="org_name">Organisation Name</label>
+                <input type="text" name="org_name" id="u_name" required>
+           </div>
+
+           <div class="password">
+                <label for="address">Address</label>
+                <input type="text" name="address" id="pass" required>
+           </div>
+
+            <button type="submit" id="btn">Confirm Details</button>
+        </form>
+    </div>
+    {%endblock form%}
+    
+</body>
+</html>

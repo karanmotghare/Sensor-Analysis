@@ -27,7 +27,7 @@ def login_access(request):
     # If the user is superAdmin
     if admin_stat == 's_admin':
         user = SuperAdmins.objects.filter(username=username)
-
+        request.isSuperAdmin = True
         if user:
             if user[0].pwd == password:
                 return display_orgs(request)
@@ -38,7 +38,7 @@ def login_access(request):
 
     else:
         user = Users.objects.filter(username=username)
-
+        request.isSuperAdmin = False
         if user:
             if user[0].pwd == password:
                 return render(request, 'homepage.html')
@@ -84,7 +84,7 @@ def display_orgs(request):
     # Else display the organisation of person/user
     else:
         user = Users.objects.filter(username=request.POST.get('username'))
-        orgs = Organisation.objects.filter(org_id=user[0].org)
+        orgs = [user[0].org]
 
         org = {
             "orgs" : orgs,
@@ -108,5 +108,21 @@ def add_user(request):
 
     user = Users(username=username, pwd=password, position=post, org=Organisation.objects.filter(org_id=org_id)[0], created_by="admin")
     user.save()
+
+    return render(request, 'success.html')
+
+# Function to render adding organisation
+def add_org(request):
+
+    return render(request, 'addOrg.html')
+
+# Function to add new organisation
+def add_new_org(request):
+
+    name = request.POST.get('org_name')
+    addr = request.POST.get('address')
+
+    org = Organisation(org_name=name, address=addr)
+    org.save()
 
     return render(request, 'success.html')
