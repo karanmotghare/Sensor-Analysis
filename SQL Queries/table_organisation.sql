@@ -6,7 +6,7 @@ drop table if exists organisation;
 
 -- Create table
 create table organisation (
-	org_id int not null,
+	org_id int not null auto_increment,
 	org_name varchar(255) not null,
     address varchar(255) not null,
     constraint organisation_pkey primary key (org_id)

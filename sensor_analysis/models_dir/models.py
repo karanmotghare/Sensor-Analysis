@@ -123,7 +123,7 @@ class DjangoSession(models.Model):
 
 
 class Location(models.Model):
-    loc_id = models.IntegerField(primary_key=True)
+    loc_id = models.AutoField(primary_key=True)
     loc_name = models.CharField(max_length=255)
     org = models.ForeignKey('Organisation', models.DO_NOTHING)
 
@@ -133,7 +133,7 @@ class Location(models.Model):
 
 
 class Organisation(models.Model):
-    org_id = models.IntegerField(primary_key=True)
+    org_id = models.AutoField(primary_key=True)
     org_name = models.CharField(max_length=255)
     address = models.CharField(max_length=255)
 
@@ -143,7 +143,7 @@ class Organisation(models.Model):
 
 
 class Sensor(models.Model):
-    sensor_id = models.IntegerField(primary_key=True)
+    sensor_id = models.AutoField(primary_key=True)
     sensor_name = models.CharField(max_length=255)
     sg = models.ForeignKey('SensorGroup', models.DO_NOTHING)
 
@@ -153,7 +153,7 @@ class Sensor(models.Model):
 
 
 class SensorActualData(models.Model):
-    record_id = models.IntegerField(primary_key=True)
+    record_id = models.AutoField(primary_key=True)
     sensor = models.ForeignKey(Sensor, models.DO_NOTHING)
     data_value = models.FloatField()
     record_time = models.DateTimeField(blank=True, null=True)
@@ -164,7 +164,7 @@ class SensorActualData(models.Model):
 
 
 class SensorGenData(models.Model):
-    record_id = models.IntegerField(primary_key=True)
+    record_id = models.AutoField(primary_key=True)
     sensor = models.ForeignKey(Sensor, models.DO_NOTHING)
     version_id = models.IntegerField()
     from_data = models.FloatField()
@@ -178,7 +178,7 @@ class SensorGenData(models.Model):
 
 
 class SensorGroup(models.Model):
-    sg_id = models.IntegerField(primary_key=True)
+    sg_id = models.AutoField(primary_key=True)
     sg_name = models.CharField(max_length=255)
     loc = models.ForeignKey(Location, models.DO_NOTHING)
 

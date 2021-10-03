@@ -6,7 +6,7 @@ drop table if exists sensor_gen_data;
 
 -- Create table
 create table sensor_gen_data (
-	record_id int not null,
+	record_id int not null auto_increment,
 	sensor_id int not null,
     version_id int not null,
     from_data float not null,

@@ -6,7 +6,7 @@ drop table if exists sensor_group;
 
 -- Create table
 create table sensor_group (
-	sg_id int not null,
+	sg_id int not null auto_increment,
     sg_name varchar(255) not null,
     loc_id int not null,
     constraint sg_pkey primary key (sg_id),
