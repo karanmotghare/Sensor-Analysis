@@ -21,6 +21,12 @@
     {%endblock header%}
 
     {%block form%}
+
+    {% if not request.isAuthorized %}
+    <div class="errmsg">
+        <p>Invalid username or password !</p>
+    </div>
+    {% endif %}
     <div class="login_form">
         <form action="{%url 'login' %}" method="POST">
             {% csrf_token %}

@@ -71,6 +71,10 @@ header p{
     
 }
 
+.errmsg{
+    color: red;
+}
+
 #u_name,#pass{
     height: 40px;
     /* border-color: white; */
