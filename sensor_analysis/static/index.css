@@ -2,6 +2,7 @@
     margin: 0px;
     padding: 0px;
     border: 0px;
+    box-sizing: border-box;
 }
 
 body{
@@ -20,13 +21,51 @@ header p{
     font-size: 20px;
     color: #FDFEFE;
     letter-spacing: 1px;
-
     font-family: 'Open Sans', sans-serif;
 }
 
+.align-right{
+    text-align: right;
+    border: 0;
+    margin-right: 15px;
+}
+
+.headerbtn{
+    background-color: #0073DD;
+    color: white;
+    font-size: medium;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.headerbtn:hover{
+    background-color: #0021dd;
+    color: white;
+}
+
+.col {
+  float: left;
+  text-align: center ;
+  width: 25%;
+  padding: 10px;
+  height: 300px; /* Should be removed. Only for demonstration */
+}
+
+.col_log{
+    margin-top: 10px;
+}
+
+.row:after {
+  content: "";
+  display: table;
+  clear: both;
+}
 
 .login_form{
-    height: 350px;
+    height: auto;
     width: 250px;
     margin: 0 auto;
     margin-top: 100px;
@@ -71,6 +110,10 @@ header p{
     
 }
 
+.errmsg{
+    color: red;
+}
+
 #u_name,#pass{
     height: 40px;
     /* border-color: white; */
@@ -81,7 +124,7 @@ header p{
 #btn{
     width: 100px;
     display: block;
-    height: 30px;
+    height: auto;
     padding: 5px;
     margin: 0 auto;
     border-radius: 5px;
