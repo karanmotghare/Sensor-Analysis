@@ -84,7 +84,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'sensor_analysis',
         'USER': 'root',
-        'PASSWORD': 'root',
+        'PASSWORD': 'MySQL@10',
         'HOST':'localhost',
         'PORT':'3306',
     }
