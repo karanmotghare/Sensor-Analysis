@@ -1,0 +1,4 @@
+/sensor_analysis/settings.py
+/__pycache__/
+/models_dir/__pycache__/
+/sensor_analysis/__pycache__/
