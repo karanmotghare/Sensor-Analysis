@@ -1,4 +1,4 @@
-/sensor_analysis/settings.py
-/__pycache__/
-/models_dir/__pycache__/
+/sensor_analysis/sensor_analysis/settings.py
 /sensor_analysis/__pycache__/
+/sensor_analysis/models_dir/__pycache__/
+/sensor_analysis/sensor_analysis/__pycache__/
