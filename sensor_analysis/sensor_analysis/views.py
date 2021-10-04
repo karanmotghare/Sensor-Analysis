@@ -4,19 +4,8 @@ from models_dir.models import *
 #from models import SuperAdmins
 
 def indexPage(request):    
-
-    return render(request,'index.html',)
-
-def get_admin_rank(admin):
-    admin_map={
-        's_admin':1,
-        'n_admin':2,
-    }
-
-    return admin_map[admin]
-
-def verify_log_details(u_name,u_pass,u_admin):
-    return True
+    request.isAuthorized = True
+    return render(request,'index.html')
 
 def login_access(request):
     #print(request)
@@ -24,12 +13,16 @@ def login_access(request):
     password = request.POST.get('password')
     admin_stat = request.POST.get('admin_opt')
 
+    request.isAuthorized = False
+
+
     # If the user is superAdmin
     if admin_stat == 's_admin':
         user = SuperAdmins.objects.filter(username=username)
         request.isSuperAdmin = True
         if user:
             if user[0].pwd == password:
+                request.isAuthorized = True
                 return display_orgs(request)
             else:
                 return render(request, 'index.html')
@@ -41,6 +34,7 @@ def login_access(request):
         request.isSuperAdmin = False
         if user:
             if user[0].pwd == password:
+                request.isAuthorized =True
                 return render(request, 'homepage.html')
             else:
                 return render(request, 'index.html')
