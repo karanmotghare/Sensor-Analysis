@@ -4,6 +4,10 @@
 - Clone the repo
 - Make sure you have Django installed
 - Then inside **Sensor-Analysis** move to **sensor_analysis** directory
+- To migrate django models to your local mysql db, execute the following:
+    ```bash
+    python manage.py migrate
+    ```
 - Inside the directory execute the command in terminal 
     ```bash
     python manage.py runserver
