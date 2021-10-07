@@ -4,8 +4,12 @@ from models_dir.models import *
 #from models import SuperAdmins
 
 def indexPage(request):    
+    mapper={
+    'heading':'Sensor Analysis',
+    'display':'display: none'
+    }
     request.isAuthorized = True
-    return render(request,'index.html')
+    return render(request,'index.html',context=mapper)
 
 def login_access(request):
     #print(request)
@@ -47,6 +51,15 @@ def login_access(request):
     return render(request,'index.html')
 
 
+def logout(request):
+    mapper={
+    'heading':'Sensor Analysis',
+    'display':'display: none'
+    }
+    request.isAuthorized = True
+
+    return render(request,'index.html',mapper)
+
 def homepage(request):
 
     return render(request,'homepage.html')
@@ -68,7 +81,9 @@ def display_orgs(request):
                 {'name':'Org Admin', 'value':'org_admin'},
                 {'name':'Location Admin', 'value':'loc_admin'},
                 {'name':'Other User', 'value':'loc_admin'}
-            ]
+            ],
+            'heading':'Super Admin Portal',
+            'display':'display: block'
         }
 
         #print(org["orgs"])
@@ -86,7 +101,9 @@ def display_orgs(request):
                 {'name':'Org Admin', 'value':'org_admin'},
                 {'name':'Location Admin', 'value':'loc_admin'},
                 {'name':'Other User', 'value':'loc_admin'}
-            ]
+            ],
+            'heading':'Admin Portal',
+            'display':'display: block'
         }
         
 

@@ -2,21 +2,68 @@
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     {%block fonts%}
+    <script type="javascript" src="{%static 'js/javascript.js'%}"></script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="stylesheet" href="{%static 'index.css' %}">
+    <link rel="stylesheet" href="{%static 'css/index.css' %}">
+
+    <script>
+        let to_drop = false;
+        function myFunction() {
+            console.log("myfunction function called");
+            x = document.getElementById('container');
+
+            x.classList.toggle("change");
+
+        }
+
+        function drop() {
+
+
+            console.log("drop function called");
+            let droplist = document.getElementById("options");
+
+            if (!to_drop) {
+                to_drop = true;
+                droplist.style.visibility = 'visible';
+            }
+            else {
+                to_drop = false;
+                droplist.style.visibility = 'hidden';
+            }
+        }
+    </script>
     {%endblock fonts%}
 
     <title>Sensor Analysis</title>
 </head>
+
 <body>
     {% block header%}
     <header>
-        <p>Sensor Analysis</p>
+
+        <p>{{heading}}</p>
+        <div class="menu_opt" id="menu" style='{{display}}'>
+            <div id="container" class="container" onclick="myFunction(); drop();">
+                <div class="bar1"></div>
+                <div class="bar2"></div>
+                <div class="bar3"></div>
+            </div>
+
+            <div class="options" id="options">
+                <ul id="drop_down">
+                   <a href="{%url 'logout'%}"> <li id="list_item">Logout</li></a>
+                    <li id="list_item">Profile</li>
+                </ul>
+            </div>
+        </div>
+
     </header>
     {%endblock header%}
 
@@ -39,15 +86,15 @@
                 </select>
             </div>
 
-           <div class="u_name">
+            <div class="u_name">
                 <label for="username">Username</label>
                 <input type="text" name="username" id="u_name" required placeholder="Username">
-           </div>
+            </div>
 
-           <div class="password">
+            <div class="password">
                 <label for="password">Password</label>
                 <input type="password" name="password" id="pass" required placeholder="Password">
-           </div>
+            </div>
 
             <button type="submit" id="btn">Sign In</button>
         </form>
@@ -59,4 +106,5 @@
     {%endblock label%} -->
     {%endblock body%}
 </body>
+
 </html>

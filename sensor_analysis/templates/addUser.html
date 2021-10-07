@@ -1,25 +1,17 @@
-{%load static%}
+{%extends 'index.html'%}
 
+{%load static%}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    {%block fonts%}
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="stylesheet" href="{%static 'index.css' %}">
-    {%endblock fonts%}
+    <script type="javascript" src="{%static 'index.js' %}"></script>
 
-    <title>Add New User</title>
 </head>
 <body>
-    {% block header%}
-    <header>
-        <p>Add New User</p>
-    </header>
-    
-    {%endblock header%}
+
 
     {%block form%}
     <div class="login_form">
