@@ -1,3 +1,4 @@
+from django.http.response import HttpResponseRedirect
 from django.shortcuts import redirect,render
 from django.http import HttpResponse,JsonResponse
 from models_dir.models import *
@@ -23,11 +24,14 @@ def login_access(request):
     # If the user is superAdmin
     if admin_stat == 's_admin':
         user = SuperAdmins.objects.filter(username=username)
-        request.isSuperAdmin = True
         if user:
             if user[0].pwd == password:
                 request.isAuthorized = True
-                return display_orgs(request)
+                request.session['user'] = username
+                request.session['admin_stat'] = 's_admin'
+                request.isSuperAdmin = True
+
+                return HttpResponseRedirect("/sAdmin")
             else:
                 return render(request, 'index.html')
         else:
@@ -35,11 +39,14 @@ def login_access(request):
 
     else:
         user = Users.objects.filter(username=username)
-        request.isSuperAdmin = False
         if user:
             if user[0].pwd == password:
                 request.isAuthorized =True
-                return render(request, 'homepage.html')
+                request.session['user'] = username
+                request.session['admin_stat'] = user[0].position
+                request.isSuperAdmin = False
+
+                return HttpResponseRedirect("/home")
             else:
                 return render(request, 'index.html')
         else:
@@ -50,32 +57,62 @@ def login_access(request):
 
     return render(request,'index.html')
 
-
 def logout(request):
     mapper={
     'heading':'Sensor Analysis',
     'display':'display: none'
     }
-    request.isAuthorized = True
+    #request.isAuthorized = True
 
-    return render(request,'index.html',mapper)
+    try:
+        del request.session['user']
+        del request.session['admin_stat']
+        request.isSuperAdmin = False
+
+    except:
+        request.isSuperAdmin = False
+        return HttpResponseRedirect("/")
+
+    return HttpResponseRedirect("/")
 
 def homepage(request):
-    mapper={
-    'heading':'Sensor Analysis',
-    'display':'display: block'
-    }
-    return render(request,'homepage.html',mapper)
+    if 'user' in request.session:
+        #print(request.session['user'])
 
+        user = Users.objects.filter(username=request.session['user']) 
+        org = user[0].org       
+
+        # Location list
+        locations = Location.objects.filter(org=org)
+
+        # Sensor Group List
+        
+
+
+        mapper={
+            'heading':'Sensor Analysis',
+            'display':'display: block'
+        }
+        return render(request,'homepage.html',mapper)
+    else:
+        return HttpResponseRedirect("/")
+
+def sAdmin(request):
+    #print(request.session['user'])
+    #print(request.isSuperAdmin)
+    if 'user' in request.session:
+        return display_orgs(request)
+
+    return HttpResponseRedirect('/')
 
 # Code for displaying list of orgs in form
 def display_orgs(request):
     #print(request)
     #print(orgs)
-    admin_stat = request.POST.get('admin_opt')
-
+    #admin_stat = request.POST.get('admin_opt')
+    #print(admin_stat)
     # If super admin, display all orgs list
-    if admin_stat == 's_admin':
+    if request.session['admin_stat'] == 's_admin' :
         orgs = Organisation.objects.all()
         
         org = {
@@ -86,16 +123,17 @@ def display_orgs(request):
                 {'name':'Other User', 'value':'loc_admin'}
             ],
             'heading':'Super Admin Portal',
-            'display':'display: block'
+            'display':'display: block',
         }
 
+        request.isSuperAdmin = True
         #print(org["orgs"])
         
         
         
     # Else display the organisation of person/user
     else:
-        user = Users.objects.filter(username=request.POST.get('username'))
+        user = Users.objects.filter(username=request.session['user'])
         orgs = [user[0].org]
 
         org = {
@@ -109,38 +147,49 @@ def display_orgs(request):
             'display':'display: block'
         }
         
+        request.isSuperAdmin = False
 
     return render(request, 'addUser.html', org)
 
 # Code to add new user
 def add_user(request):
 
-    username = request.POST.get('username')
-    password = request.POST.get('password')
-    org_id = request.POST.get('org_opt')
-    post = request.POST.get('post_opt')
+    if 'user' in request.session:
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        org_id = request.POST.get('org_opt')
+        post = request.POST.get('post_opt')
 
-    user = Users(username=username, pwd=password, position=post, org=Organisation.objects.filter(org_id=org_id)[0], created_by="admin")
-    user.save()
+        user = Users(username=username, pwd=password, position=post, org=Organisation.objects.filter(org_id=org_id)[0], created_by="admin")
+        user.save()
 
-    return render(request, 'success.html')
+        return render(request, 'success.html')
 
 # Function to render adding organisation
 def add_org(request):
-
-    return render(request, 'addOrg.html')
+    if request.session['admin_stat']=='s_admin':
+        return render(request, 'addOrg.html')
+    
+    return HttpResponseRedirect('/home')
 
 # Function to add new organisation
 def add_new_org(request):
+    
+    if 'user' in request.session:
+        if request.isSuperAdmin:
+            name = request.POST.get('org_name')
+            addr = request.POST.get('address')
 
-    name = request.POST.get('org_name')
-    addr = request.POST.get('address')
+            org = Organisation(org_name=name, address=addr)
+            org.save()
 
-    org = Organisation(org_name=name, address=addr)
-    org.save()
-
-    return render(request, 'success.html')
-
+            return render(request, 'success.html')
+        
+        else:
+            return HttpResponseRedirect('/home')
+    
+    else:
+        return HttpResponseRedirect('/')
 
 def chart_js(request):
 
