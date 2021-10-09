@@ -22,18 +22,20 @@
         <div class="col">
             <h2>Location</h2>
             <div class="col_log">
-                <select name="location" id="loaction_list">
-                    <option id="loc_opt" value="ngp_loc">Nagpur</option>
-                    <option id="loc_opt" value="pn_loc">Pune</option>
-                    <option id="loc_opt" value="mbi_loc">Mumbai</option>
+                <select name="location" id="location_list" onchange="change_location();">
+                    <option value="" selected disabled>Select Location</option>
+                    {% for location in locations %}
+                    <option id="loc_opt" value="{{location.loc_id}}">{{location.loc_name}}</option>
+                    {% endfor %}
                 </select>
             </div>
         </div>
         <div class="col">
             <h2>Sensor Group</h2>
             <div class="col_log">
-                <select name="sensorgrp" id="sngrp_list">
-                    <option id="sgrp_id" value="hvac_demo">HVAC_demo</option>
+                <select name="sensorgrp" id="sngrp_list" onchange="change_sg();">
+                    <option value="" selected disabled>Select Sensor group</option>
+                    <!--<option id="sgrp_id" value="hvac_demo">HVAC_demo</option>-->
                 </select>
             </div>
         </div>
@@ -41,9 +43,11 @@
             <h2>Select Sensors</h2>
             <div class="col_log">
                 <select name="sensors" id="sns_list">
-                    <option id="sns_id" value="sns1">ac-temp</option>
+                    <option selected disabled>Select Sensor</option>
+                    <!--<option id="sns_id" value="sns1">ac-temp</option>
                     <option id="sns_id" value="sns2">ac-fanSpeed</option>
                     <option id="sns_id" value="sns3">alaram</option>
+                    -->
                 </select>
             </div>
         </div>

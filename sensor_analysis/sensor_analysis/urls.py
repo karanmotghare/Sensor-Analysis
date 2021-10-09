@@ -29,5 +29,6 @@ urlpatterns = [
     path('addOrg', views.add_org, name='addOrg'),
     path('addNewOrg', views.add_new_org, name='addNewOrg'),
     path('chartJS', views.chart_js, name='chart'),
-
+    path('getSgAjax', views.getSgAjax, name='getSgAjax'),
+    path('getSensorAjax', views.getSensorAjax, name='getSensorAjax'),
 ]

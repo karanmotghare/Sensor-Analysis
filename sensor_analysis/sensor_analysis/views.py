@@ -1,6 +1,7 @@
 from django.http.response import HttpResponseRedirect
 from django.shortcuts import redirect,render
 from django.http import HttpResponse,JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 from models_dir.models import *
 #from models import SuperAdmins
 
@@ -90,6 +91,7 @@ def homepage(request):
 
 
         mapper={
+            'locations':locations,
             'heading':'Sensor Analysis',
             'display':'display: block'
         }
@@ -194,3 +196,38 @@ def add_new_org(request):
 def chart_js(request):
 
     return render(request,'chartdemo.html')
+
+# Function to load sensor groups
+@csrf_exempt
+def getSgAjax(request):
+
+    if request.method == "POST":
+        location_id = request.POST['location_id']
+        try:
+            if location_id:
+                location = Location.objects.filter(loc_id = location_id).first()
+                sgs = SensorGroup.objects.filter(loc = location)
+            else:
+                sgs = SensorGroup.objects.none()
+        except Exception:
+            request.data['error_message'] = 'error'
+            return JsonResponse(request.data)
+        return JsonResponse(list(sgs.values('sg_id', 'sg_name')), safe = False) 
+
+# Function to load sensors
+@csrf_exempt
+def getSensorAjax(request):
+
+    if request.method == "POST":
+        sg_id = request.POST['sg_id']
+        try:
+            if sg_id:
+                sg = SensorGroup.objects.filter(sg_id = sg_id).first()
+                sensors = Sensor.objects.filter(sg = sg)
+            else:
+                sensors = Sensor.objects.none()
+        except Exception:
+            request.data['error_message'] = 'error'
+            return JsonResponse(request.data)
+        return JsonResponse(list(sensors.values('sensor_id', 'sensor_name')), safe = False) 
+
