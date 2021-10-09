@@ -61,8 +61,11 @@ def logout(request):
     return render(request,'index.html',mapper)
 
 def homepage(request):
-
-    return render(request,'homepage.html')
+    mapper={
+    'heading':'Sensor Analysis',
+    'display':'display: block'
+    }
+    return render(request,'homepage.html',mapper)
 
 
 # Code for displaying list of orgs in form
@@ -137,3 +140,8 @@ def add_new_org(request):
     org.save()
 
     return render(request, 'success.html')
+
+
+def chart_js(request):
+
+    return render(request,'chartdemo.html')
