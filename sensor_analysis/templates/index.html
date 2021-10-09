@@ -8,37 +8,12 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     {%block fonts%}
-    <script type="javascript" src="{%static 'js/javascript.js'%}"></script>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="stylesheet" href="{%static 'css/index.css' %}">
-
-    <script>
-        let to_drop = false;
-        function myFunction() {
-            console.log("myfunction function called");
-            x = document.getElementById('container');
-
-            x.classList.toggle("change");
-
-        }
-
-        function drop() {
+    <script src="{%static 'js/javascript.js'%}"></script>
 
 
-            console.log("drop function called");
-            let droplist = document.getElementById("options");
-
-            if (!to_drop) {
-                to_drop = true;
-                droplist.style.visibility = 'visible';
-            }
-            else {
-                to_drop = false;
-                droplist.style.visibility = 'hidden';
-            }
-        }
-    </script>
     {%endblock fonts%}
 
     <title>Sensor Analysis</title>

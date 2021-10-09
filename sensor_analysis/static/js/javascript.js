@@ -11,7 +11,7 @@ function drop() {
 
 
     console.log("drop function called");
-    let droplist = document.getElementById("options");
+    let droplist = document.getElementById('options');
 
     if (!to_drop) {
         to_drop = true;

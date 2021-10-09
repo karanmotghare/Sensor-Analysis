@@ -26,5 +26,7 @@ urlpatterns = [
     path('home',views.homepage,name='home'),
     path('addUser', views.add_user, name='addUser'),
     path('addOrg', views.add_org, name='addOrg'),
-    path('addNewOrg', views.add_new_org, name='addNewOrg')
+    path('addNewOrg', views.add_new_org, name='addNewOrg'),
+    path('chartJS', views.chart_js, name='chart'),
+
 ]
