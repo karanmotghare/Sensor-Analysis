@@ -13,6 +13,18 @@
 
 
     {%block form%}
+
+    {%block statuscode%}
+    {%if msg_display%}
+    <div class="status_code" id="status_code">
+        <p>{{msg}}</p>
+    </div>
+    <script>
+        document.getElementById('status_code').style.color='{{style.color}}';
+        document.getElementById('status_code').style.backgroundColor='{{style.bg_color}}';
+    </script>
+    {%endif%}
+    {%endblock statuscode%}
     <div class="login_form">
         <form action="{%url 'addUser' %}" method="POST">
             {% csrf_token %}

@@ -5,14 +5,16 @@ from django.views.decorators.csrf import csrf_exempt
 from models_dir.models import *
 #from models import SuperAdmins
 
+#index page
 def indexPage(request):    
     mapper={
     'heading':'Sensor Analysis',
-    'display':'display: none'
+    'display':'none'
     }
     request.isAuthorized = True
     return render(request,'index.html',context=mapper)
 
+#login request check
 def login_access(request):
     #print(request)
     username = request.POST.get('username')
@@ -58,10 +60,11 @@ def login_access(request):
 
     return render(request,'index.html')
 
+#logout function
 def logout(request):
     mapper={
     'heading':'Sensor Analysis',
-    'display':'display: none'
+    'display':'none'
     }
     #request.isAuthorized = True
 
@@ -93,7 +96,7 @@ def homepage(request):
         mapper={
             'locations':locations,
             'heading':'Sensor Analysis',
-            'display':'display: block'
+            'display':'block'
         }
         return render(request,'homepage.html',mapper)
     else:
@@ -103,55 +106,49 @@ def sAdmin(request):
     #print(request.session['user'])
     #print(request.isSuperAdmin)
     if 'user' in request.session:
-        return display_orgs(request)
+        if request.session['admin_stat'] == 's_admin' :
+            orgs = Organisation.objects.all()
 
-    return HttpResponseRedirect('/')
+            org = {
+                "orgs" : orgs,
+                "roles" : [
+                    {'name':'Org Admin', 'value':'org_admin'},
+                    {'name':'Location Admin', 'value':'loc_admin'},
+                    {'name':'Other User', 'value':'user'}
+                ],
+                'heading':'Super Admin Portal',
+                'display':'block',
+                'msg_display':False
+            }
 
-# Code for displaying list of orgs in form
-def display_orgs(request):
-    #print(request)
-    #print(orgs)
-    #admin_stat = request.POST.get('admin_opt')
-    #print(admin_stat)
-    # If super admin, display all orgs list
-    if request.session['admin_stat'] == 's_admin' :
-        orgs = Organisation.objects.all()
-        
-        org = {
-            "orgs" : orgs,
-            "roles" : [
-                {'name':'Org Admin', 'value':'org_admin'},
-                {'name':'Location Admin', 'value':'loc_admin'},
-                {'name':'Other User', 'value':'loc_admin'}
-            ],
-            'heading':'Super Admin Portal',
-            'display':'display: block',
-        }
+            request.isSuperAdmin = True
+            #print(org["orgs"])
 
-        request.isSuperAdmin = True
-        #print(org["orgs"])
-        
-        
-        
-    # Else display the organisation of person/user
+        # Else display the organisation of person/user
+        else:
+            user = Users.objects.filter(username=request.session['user'])
+            orgs = [user[0].org]
+
+            org = {
+                "orgs" : orgs,
+                "roles" : [
+                    {'name':'Org Admin', 'value':'org_admin'},
+                    {'name':'Location Admin', 'value':'loc_admin'},
+                    {'name':'Other User', 'value':'user'}
+                ],
+                'heading':'Admin Portal',
+                'display':'block',
+                'msg_display':False
+
+            }
+
+            request.isSuperAdmin = False
+
+        return render(request, 'addUser.html', org)
     else:
-        user = Users.objects.filter(username=request.session['user'])
-        orgs = [user[0].org]
+        return HttpResponseRedirect('/')
 
-        org = {
-            "orgs" : orgs,
-            "roles" : [
-                {'name':'Org Admin', 'value':'org_admin'},
-                {'name':'Location Admin', 'value':'loc_admin'},
-                {'name':'Other User', 'value':'loc_admin'}
-            ],
-            'heading':'Admin Portal',
-            'display':'display: block'
-        }
-        
-        request.isSuperAdmin = False
 
-    return render(request, 'addUser.html', org)
 
 # Code to add new user
 def add_user(request):
@@ -161,16 +158,71 @@ def add_user(request):
         password = request.POST.get('password')
         org_id = request.POST.get('org_opt')
         post = request.POST.get('post_opt')
+        
+  
+        if request.session['admin_stat'] == 's_admin' :
+            orgs = Organisation.objects.all()
 
-        user = Users(username=username, pwd=password, position=post, org=Organisation.objects.filter(org_id=org_id)[0], created_by="admin")
-        user.save()
+            org = {
+                "orgs" : orgs,
+                "roles" : [
+                    {'name':'Org Admin', 'value':'org_admin'},
+                    {'name':'Location Admin', 'value':'loc_admin'},
+                    {'name':'Other User', 'value':'loc_admin'}
+                ],
+                'heading':'Super Admin Portal',
+                'display':'block',
+                'msg_display':True,
+                'msg':"Entry added successfully",
+                'style': {
+                    'color':'green',
+                    'bg_color':'#B2EFA8'
+                },
+       
+            }
 
-        return render(request, 'success.html')
+            request.isSuperAdmin = True
+
+        else:
+            user = Users.objects.filter(username=request.session['user'])
+            orgs = [user[0].org]
+
+            org = {
+                "orgs" : orgs,
+                "roles" : [
+                    {'name':'Org Admin', 'value':'org_admin'},
+                    {'name':'Location Admin', 'value':'loc_admin'},
+                    {'name':'Other User', 'value':'loc_admin'}
+                ],
+                'heading':'Admin Portal',
+                'display':'block',
+                'msg_display':True,
+                'msg':"Entry added successfully",
+                'style': {
+                    'color':'green',
+                    'bg_color':'#B2EFA8'
+                },
+                
+
+            }
+
+        if len(username) > 0 and len(password)>0:
+            user = Users(username=username, pwd=password, position=post, org=Organisation.objects.filter(org_id=org_id)[0], created_by="admin")
+            user.save()
+        else:
+            org['msg']="Please enter valid details"
+            org['style']={'color':'red','bg_color':'#F5B3B4'}
+
+        return render(request, 'addUser.html',org)
 
 # Function to render adding organisation
 def add_org(request):
+    mapper={
+    'heading':'Super Admin Portal',
+    'display':'block'
+    }
     if request.session['admin_stat']=='s_admin':
-        return render(request, 'addOrg.html')
+        return render(request, 'addOrg.html',mapper)
     
     return HttpResponseRedirect('/home')
 
