@@ -35,7 +35,6 @@
             <div class="col_log">
                 <select name="sensorgrp" id="sngrp_list" onchange="change_sg();">
                     <option value="" selected disabled>Select Sensor group</option>
-                    <!--<option id="sgrp_id" value="hvac_demo">HVAC_demo</option>-->
                 </select>
             </div>
         </div>
@@ -43,11 +42,7 @@
             <h2>Select Sensors</h2>
             <div class="col_log">
                 <select name="sensors" id="sns_list">
-                    <option selected disabled>Select Sensor</option>
-                    <!--<option id="sns_id" value="sns1">ac-temp</option>
-                    <option id="sns_id" value="sns2">ac-fanSpeed</option>
-                    <option id="sns_id" value="sns3">alaram</option>
-                    -->
+                    <option value="" selected disabled>Select Sensor</option>
                 </select>
             </div>
         </div>
@@ -69,7 +64,23 @@
         </div>
 
     </div>
-  
+    
+    <div class="row">
+        <div class="col">
+            <button onclick="add_to_compare();" id="btn">Add</button>
+            <div class="selection_status" id="err_msg">
+            </div>
+        </div>
+        <div class="col">
+            <select name="selection" id="selection" class="selection" multiple="multiple">
+                
+            </select>
+        </div>
+        <div class="col">
+            <button onclick="remove_from_list();" id="btn_red">Remove</button>
+        </div>
+    </div>
+
     {%endblock body%}
 
 </body>

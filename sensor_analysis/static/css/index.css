@@ -234,6 +234,22 @@ li:hover{
 
 }
 
+#btn_red{
+    width: 100px;
+    display: block;
+    height: auto;
+    padding: 10px;
+    margin: 0 auto;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    background-color: red;
+    color: #FDFEFE;
+    box-shadow: 2px 2px 2px #000;
+    font-family: 'Open Sans',sans-serif;
+    font-size: 13px;
+
+}
+
 .status_code{
     width: 80%;
     margin: 0 auto;
@@ -245,4 +261,35 @@ li:hover{
     margin-top: 30px;
     margin-bottom: -30px;
 
+}
+
+.selection_status{
+    color: red;
+    width: 80%;
+    margin: 0 auto;
+    margin-top: 30px;
+    margin-bottom: -30px;
+    padding: 20px;
+    font-family: 'Open Sans',sans-serif;
+    font-size: 16px;
+    text-align: center;
+    border-radius: 6px;
+}
+
+.selection{
+    display: block;
+    width: 100%;
+    padding: 8px 12px;
+    font-size: 14px;
+    line-height: 1.42857143;
+    color: #555555;
+    background-color: #ffffff;
+    background-image: none;
+    border: 1px solid #0000FF;
+    border-radius: 4px;
+    -webkit-box-shadow: inset 0 1px 1px rgb(0 0 0 / 8%);
+    box-shadow: inset 0 1px 1px rgb(0 0 0 / 8%);
+    -webkit-transition: border-color ease-in-out .15s,-webkit-box-shadow ease-in-out .15s;
+    -o-transition: border-color ease-in-out .15s,box-shadow ease-in-out .15s;
+    transition: border-color ease-in-out .15s,box-shadow ease-in-out .15s;
 }
