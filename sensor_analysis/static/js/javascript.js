@@ -166,3 +166,45 @@ function remove_from_list(){
         }
     }
 }
+
+// Date time picker
+$(function () {
+    $('#datetimepicker6').datetimepicker();
+    $('#datetimepicker7').datetimepicker({
+        useCurrent: false
+    });
+    $("#datetimepicker6").on("dp.change", function (e) {
+        $('#datetimepicker7').data("DateTimePicker").minDate(e.date);
+    });
+    $("#datetimepicker7").on("dp.change", function (e) {
+        $('#datetimepicker6').data("DateTimePicker").maxDate(e.date);
+    });
+});
+
+// Generate graph
+function generate_graph(){
+
+
+    var from = document.getElementById('from_time').value;
+    var to = document.getElementById('to_time').value;
+    var list = document.getElementById('selection').options;
+
+    if(!from || !to || !list.length)
+    {
+        console.log("Invalid Selection !");
+    }
+    else
+    {
+        // String to js Date
+        fr = new Date(from);
+
+        // Converting to mysql format
+        mys = fr.toISOString().split('T')[0] + ' ' + fr.toTimeString().split(' ')[0];
+
+        console.log(fr);
+        console.log(mys);
+        console.log(typeof fr);
+    }
+
+    
+}

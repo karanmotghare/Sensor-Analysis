@@ -22,7 +22,10 @@ def login_access(request):
     admin_stat = request.POST.get('admin_opt')
 
     request.isAuthorized = False
-
+    mapper={
+    'heading':'Sensor Analysis',
+    'display':'none'
+    }
 
     # If the user is superAdmin
     if admin_stat == 's_admin':
@@ -36,9 +39,9 @@ def login_access(request):
 
                 return HttpResponseRedirect("/sAdmin")
             else:
-                return render(request, 'index.html')
+                return render(request, 'index.html', context=mapper)
         else:
-            return render(request, 'index.html') 
+            return render(request, 'index.html', context=mapper) 
 
     else:
         user = Users.objects.filter(username=username)
@@ -51,9 +54,9 @@ def login_access(request):
 
                 return HttpResponseRedirect("/home")
             else:
-                return render(request, 'index.html')
+                return render(request, 'index.html', context=mapper)
         else:
-            return render(request, 'index.html') 
+            return render(request, 'index.html', context=mapper) 
 
 
     #print(admin_stat)
