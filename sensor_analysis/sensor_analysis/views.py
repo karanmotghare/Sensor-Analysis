@@ -219,16 +219,32 @@ def add_user(request):
 def add_org(request):
     mapper={
     'heading':'Super Admin Portal',
-    'display':'block'
+    'display':'block',
+    'msg_display':False
     }
+
     if request.session['admin_stat']=='s_admin':
+        request.isSuperAdmin=True
+
         return render(request, 'addOrg.html',mapper)
     
     return HttpResponseRedirect('/home')
 
 # Function to add new organisation
 def add_new_org(request):
-    
+    mapper={
+    'heading':'Super Admin Portal',
+    'display':'block',
+    'msg_display':True,
+    'msg':"Entry added successfully",
+    'style': {
+        'color':'green',
+        'bg_color':'#B2EFA8'
+        },
+    }
+    request.isSuperAdmin=True
+
+
     if 'user' in request.session:
         if request.isSuperAdmin:
             name = request.POST.get('org_name')
@@ -236,8 +252,8 @@ def add_new_org(request):
 
             org = Organisation(org_name=name, address=addr)
             org.save()
-
-            return render(request, 'success.html')
+            request.isSuperAdmin=True
+            return render(request, 'addOrg.html',mapper)
         
         else:
             return HttpResponseRedirect('/home')
