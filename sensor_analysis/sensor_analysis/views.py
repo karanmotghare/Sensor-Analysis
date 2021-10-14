@@ -3,6 +3,8 @@ from django.shortcuts import redirect,render
 from django.http import HttpResponse,JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from models_dir.models import *
+import json
+
 #from models import SuperAdmins
 
 #index page
@@ -302,3 +304,47 @@ def getSensorAjax(request):
             return JsonResponse(request.data)
         return JsonResponse(list(sensors.values('sensor_id', 'sensor_name')), safe = False) 
 
+# Function to get sensor data
+@csrf_exempt
+def getDataValues(request):
+    
+    if request.method == "POST":
+        sensors_list = (json.loads(request.POST['sensors']))["data"]
+        to = request.POST["to_time"]
+        frm = request.POST["from_time"]
+        print(sensors_list, to, frm)
+        # Initialise the return list
+        data_list = []
+        
+        try:
+            if sensors_list:
+                
+                # Get data for every sensor
+                for sensor in sensors_list:
+                    
+                    val = sensor.split(',')
+                    sns = Sensor.objects.filter(sensor_id = val[2])
+                    data = SensorActualData.objects.filter(sensor = sns[0], record_time__lte = to, record_time__gte = frm)
+
+                    lst = []
+
+                    for point in data:
+                        value = {
+                            'x' : point.record_time,
+                            'y' : point.data_value
+                        }
+
+                        lst.append(value)
+
+                    obj = {
+                        'label' : sns[0].sensor_name,
+                        'data' : lst 
+                    }
+
+                    data_list.append(obj)
+
+        except Exception:
+            request.data['error_message'] = Exception
+            return JsonResponse(request.data)
+        
+        return JsonResponse(list(data_list) , safe=False)

@@ -185,25 +185,57 @@ $(function () {
 function generate_graph(){
 
 
-    var from = document.getElementById('from_time').value;
-    var to = document.getElementById('to_time').value;
+    var from_time = document.getElementById('from_time').value;
+    var to_time = document.getElementById('to_time').value;
     var list = document.getElementById('selection').options;
+    console.log(list);
 
-    if(!from || !to || !list.length)
+    if(!from_time || !to_time || !list.length)
     {
         console.log("Invalid Selection !");
     }
     else
     {
         // String to js Date
-        fr = new Date(from);
+        from = new Date(from_time);
+        to = new Date(to_time);
 
         // Converting to mysql format
-        mys = fr.toISOString().split('T')[0] + ' ' + fr.toTimeString().split(' ')[0];
+        from_mysql = from.toISOString().split('T')[0] + ' ' + from.toTimeString().split(' ')[0];
+        to_mysql = to.toISOString().split('T')[0] + ' ' + to.toTimeString().split(' ')[0];
 
-        console.log(fr);
-        console.log(mys);
-        console.log(typeof fr);
+        console.log(from, to);
+        console.log(from_mysql, to_mysql);
+        //console.log(typeof fr);
+
+        // Get data from db using ajax
+        data = new Array(list.length);
+        for(var i=0; i<list.length; i++)
+        {
+            data[i] = list[i].value
+            //data[i] = (list[i].value).split(",").map(Number);
+        }
+
+        data_list = {"data" : data}
+
+        console.log(JSON.stringify(data_list));
+        
+        $.ajax({
+            type: "POST",
+            url: 'getDataValues',
+            data: {
+                'sensors' : JSON.stringify(data_list),
+                'from_time' : from_mysql,
+                'to_time' : to_mysql,
+                'csrfmiddlewaretoken': '{{ csrf_token }}',
+            },
+
+            success: function(sensors_data){
+                console.log(sensors_data);
+                window.open('chartJS');
+            }
+        })
+        
     }
 
     

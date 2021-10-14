@@ -31,4 +31,5 @@ urlpatterns = [
     path('chartJS', views.chart_js, name='chart'),
     path('getSgAjax', views.getSgAjax, name='getSgAjax'),
     path('getSensorAjax', views.getSensorAjax, name='getSensorAjax'),
+    path('getDataValues', views.getDataValues, name='getDataValues'),
 ]
