@@ -32,4 +32,6 @@ urlpatterns = [
     path('getSgAjax', views.getSgAjax, name='getSgAjax'),
     path('getSensorAjax', views.getSensorAjax, name='getSensorAjax'),
     path('getDataValues', views.getDataValues, name='getDataValues'),
+    path('redirectChart', views.redirectChart, name='redirectChart'),
+
 ]

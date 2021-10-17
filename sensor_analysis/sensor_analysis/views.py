@@ -312,7 +312,7 @@ def getDataValues(request):
         sensors_list = (json.loads(request.POST['sensors']))["data"]
         to = request.POST["to_time"]
         frm = request.POST["from_time"]
-        print(sensors_list, to, frm)
+        # print(sensors_list, to, frm)
         # Initialise the return list
         data_list = []
         
@@ -348,3 +348,13 @@ def getDataValues(request):
             return JsonResponse(request.data)
         
         return JsonResponse(list(data_list) , safe=False)
+
+@csrf_exempt
+def redirectChart(request):
+
+    if request.method=="POST":
+        sensors_data = json.loads(request.POST['sensors_data'])
+
+        print(sensors_data)
+
+    return JsonResponse("ERROR",safe=False)

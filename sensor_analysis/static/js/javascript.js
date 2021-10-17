@@ -197,12 +197,15 @@ function generate_graph(){
     else
     {
         // String to js Date
+        console.log("From time ",from_time);
         from = new Date(from_time);
         to = new Date(to_time);
+        console.log("From entry ");
+        console.log(from[0]);
 
         // Converting to mysql format
-        from_mysql = from.toISOString().split('T')[0] + ' ' + from.toTimeString().split(' ')[0];
-        to_mysql = to.toISOString().split('T')[0] + ' ' + to.toTimeString().split(' ')[0];
+        from_mysql = moment(from).format('YYYY-MM-DD HH:mm:ss');
+        to_mysql = moment(to).format('YYYY-MM-DD HH:mm:ss');
 
         console.log(from, to);
         console.log(from_mysql, to_mysql);
@@ -232,8 +235,18 @@ function generate_graph(){
 
             success: function(sensors_data){
                 console.log(sensors_data);
-                window.open('chartJS');
+                // window.open('chartJS');
+                $.ajax({
+                    type: "POST",
+                    url: 'redirectChart',
+                    data:{
+                        'sensors_data':JSON.stringify(sensors_data),
+                        'csrfmiddlewaretoken': '{{ csrf_token }}'
+                    }
+
+                })
             }
+
         })
         
     }
