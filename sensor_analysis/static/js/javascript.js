@@ -235,16 +235,19 @@ function generate_graph(){
 
             success: function(sensors_data){
                 console.log(sensors_data);
-                // window.open('chartJS');
-                $.ajax({
-                    type: "POST",
-                    url: 'redirectChart',
-                    data:{
-                        'sensors_data':JSON.stringify(sensors_data),
-                        'csrfmiddlewaretoken': '{{ csrf_token }}'
-                    }
+                var newWindow = window.open('chartJS');
+                
+                localStorage.setItem('sensors_data', JSON.stringify(sensors_data));
+                
+                // $.ajax({
+                //     type: "POST",
+                //     url: 'redirectChart',
+                //     data:{
+                //         'sensors_data':JSON.stringify(sensors_data),
+                //         'csrfmiddlewaretoken': '{{ csrf_token }}'
+                //     }
 
-                })
+                // })
             }
 
         })
@@ -252,4 +255,81 @@ function generate_graph(){
     }
 
     
+}
+
+// Generate random colour
+function getRandomColor() {
+    var letters = '0123456789ABCDEF';
+    var color = '#';
+    for (var i = 0; i < 6; i++) {
+      color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+}
+
+// Display Graph
+function displayGraph(){
+    console.log("New window opened");
+    sensors_data = JSON.parse(localStorage.getItem('sensors_data'));
+    console.log(sensors_data);
+
+    var dataset = [];
+
+    // For every sensor
+    for(var i=0; i<sensors_data.length; i++)
+    {
+        console.log(sensors_data[i]);
+        console.log(sensors_data[i]['label']);
+
+        var data = [];
+
+        // For every date-value pair for that sensor
+        for(var j=0; j<sensors_data[i]['data'].length; j++)
+        {
+            var val = {
+                    x : sensors_data[i]['data'][j]['x'],
+                    y : sensors_data[i]['data'][j]['y']
+                };
+            
+            data.push(val);
+        };
+
+        var obj = {
+            label: sensors_data[i]['label'],
+            borderColor: getRandomColor(),
+            fill: false,
+            data: data
+        };
+
+        dataset.push(obj);
+
+    }
+      
+    var ctx = document.getElementById('new_chart').getContext('2d');
+    console.log(ctx)
+    var chart = new Chart(ctx, {
+        type: 'line',
+        data: { datasets: dataset },
+        options: {
+            scales: {
+            xAxes: [{
+                type: 'time'
+            }]
+            },
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                title: {
+                    display: true,
+                    text: 'Chart.js Line Chart'
+                }
+            }
+        }
+    });
+
+
+
+    // console.log(JSON.parse(sensors_data));
 }

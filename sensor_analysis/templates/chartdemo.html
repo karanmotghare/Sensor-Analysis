@@ -1,3 +1,6 @@
+{%load static%}
+
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -5,13 +8,18 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js" integrity="sha512-qTXRIMyZIFb8iQcfjXWCO8+M5Tbc38Qi5WzdPOYZHIlZpzBHG3L3by84BBBOiRGiEb7KKtAOAs5qYdUiZiQNNQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
+    <script src="../static/js/javascript.js"></script>
+
+    <!-- <script>window.onload = displayGraph()</script> -->
     <title>Chart JS</title>
 </head>
 
 <body>
 
-    <div style="width: 500px; height: 500px;">
+    <!-- <div style="width: 500px; height: 500px;">
         <canvas id="myChart"></canvas>
     </div>
 
@@ -102,7 +110,17 @@
 
         var chart = document.getElementById("line_chart");
         var lineChart = new Chart(chart,config);
+    </script> -->
+
+
+    <div style="width: 1000px; height: 1000px;">
+        <canvas id="new_chart"></canvas>
+    </div>
+    <script>
+        displayGraph();
     </script>
+
+
 </body>
 
 </html>

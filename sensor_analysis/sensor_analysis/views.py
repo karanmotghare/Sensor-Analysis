@@ -330,7 +330,7 @@ def getDataValues(request):
 
                     for point in data:
                         value = {
-                            'x' : point.record_time,
+                            'x' : (point.record_time).strftime('%Y-%m-%d %H:%M:%S'),
                             'y' : point.data_value
                         }
 
@@ -348,13 +348,3 @@ def getDataValues(request):
             return JsonResponse(request.data)
         
         return JsonResponse(list(data_list) , safe=False)
-
-@csrf_exempt
-def redirectChart(request):
-
-    if request.method=="POST":
-        sensors_data = json.loads(request.POST['sensors_data'])
-
-        print(sensors_data)
-
-    return JsonResponse("ERROR",safe=False)
