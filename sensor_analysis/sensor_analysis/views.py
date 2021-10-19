@@ -211,10 +211,10 @@ def add_user(request):
 
             }
 
-        if len(username) > 0 and len(password)>0:
+        try:
             user = Users(username=username, pwd=password, position=post, org=Organisation.objects.filter(org_id=org_id)[0], created_by="admin")
             user.save()
-        else:
+        except Exception:
             org['msg']="Please enter valid details"
             org['style']={'color':'red','bg_color':'#F5B3B4'}
 
@@ -255,8 +255,13 @@ def add_new_org(request):
             name = request.POST.get('org_name')
             addr = request.POST.get('address')
 
-            org = Organisation(org_name=name, address=addr)
-            org.save()
+            try:
+                org = Organisation(org_name=name, address=addr)
+                org.save()
+            except Exception:
+                mapper['msg']="Please enter valid details"
+                mapper['style']={'color':'red','bg_color':'#F5B3B4'}
+
             request.isSuperAdmin=True
             return render(request, 'addOrg.html',mapper)
         
