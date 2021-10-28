@@ -1,3 +1,4 @@
+{%extends 'index.html'%}
 {%load static%}
 
 <!DOCTYPE html>
@@ -6,22 +7,23 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    {%block fonts%}
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="stylesheet" href="{%static 'index.css' %}">
-    {%endblock fonts%}
-
-    <title>Add New Organisation</title>
+    
 </head>
 <body>
-    {% block header%}
-    <header>
-        <p>Add New Organisation</p>
-    </header>
-    
-    {%endblock header%}
+
 
     {%block form%}
+    {%block statuscode%}
+    {%if msg_display%}
+    <div class="status_code" id="status_code">
+        <p>{{msg}}</p>
+    </div>
+    <script>
+        document.getElementById('status_code').style.color='{{style.color}}';
+        document.getElementById('status_code').style.backgroundColor='{{style.bg_color}}';
+    </script>
+    {%endif%}
+    {%endblock statuscode%}
     <div class="login_form">
         <form action="{%url 'addNewOrg' %}" method="POST">
             {% csrf_token %}

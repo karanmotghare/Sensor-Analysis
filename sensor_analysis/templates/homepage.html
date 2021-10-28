@@ -12,14 +12,7 @@
     <title>Home</title>
 </head>
 <body>
-    {% block header%}
-    <header>
-        <p>Sensor Analysis</p>
-        <div class="align-right">
-            <button type="button" class="headerbtn">logout</button>
-        </div>
-    </header>
-    {%endblock header%}
+
     {% block form%}
         
     {%endblock form%}
@@ -29,18 +22,19 @@
         <div class="col">
             <h2>Location</h2>
             <div class="col_log">
-                <select name="location" id="loaction_list">
-                    <option id="loc_opt" value="ngp_loc">Nagpur</option>
-                    <option id="loc_opt" value="pn_loc">Pune</option>
-                    <option id="loc_opt" value="mbi_loc">Mumbai</option>
+                <select name="location" id="location_list" onchange="change_location();">
+                    <option value="" selected disabled>Select Location</option>
+                    {% for location in locations %}
+                    <option id="loc_opt" value="{{location.loc_id}}">{{location.loc_name}}</option>
+                    {% endfor %}
                 </select>
             </div>
         </div>
         <div class="col">
             <h2>Sensor Group</h2>
             <div class="col_log">
-                <select name="sensorgrp" id="sngrp_list">
-                    <option id="sgrp_id" value="hvac_demo">HVAC_demo</option>
+                <select name="sensorgrp" id="sngrp_list" onchange="change_sg();">
+                    <option value="" selected disabled>Select Sensor group</option>
                 </select>
             </div>
         </div>
@@ -48,9 +42,7 @@
             <h2>Select Sensors</h2>
             <div class="col_log">
                 <select name="sensors" id="sns_list">
-                    <option id="sns_id" value="sns1">ac-temp</option>
-                    <option id="sns_id" value="sns2">ac-fanSpeed</option>
-                    <option id="sns_id" value="sns3">alaram</option>
+                    <option value="" selected disabled>Select Sensor</option>
                 </select>
             </div>
         </div>
@@ -58,23 +50,52 @@
             <h2>Time</h2>
             <div class="col_log">
                 
-                <select name="time" id="time_list">
-                    <option id="t_id" value="t1">2021-1-jan-1:1</option>
-                    <option id="t_id" value="t2">2021-1-jan-1:2</option>
-                    <option id="t_id" value="t3">2021-1-jan-1:3</option>
-                </select>
-
-                <select name="time" id="time_list">
-                    <option id="t_id" value="t1">2021-1-jan-1:1</option>
-                    <option id="t_id" value="t2">2021-1-jan-1:2</option>
-                    <option id="t_id" value="t3">2021-1-jan-1:3</option>
-                </select>
+                <div class="row" style="margin-left: auto; margin-right: auto;">
+                    <div class='row'>
+                        <div class="form-group">
+                            <div class='input-group date' id='datetimepicker6'>
+                                <input id="from_time" type='text' class="form-control" />
+                                <span class="input-group-addon">
+                                    <span class="glyphicon glyphicon-calendar"></span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class='row'>
+                        <div class="form-group">
+                            <div class='input-group date' id='datetimepicker7'>
+                                <input id="to_time" type='text' class="form-control" />
+                                <span class="input-group-addon">
+                                    <span class="glyphicon glyphicon-calendar"></span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
         </div>
 
     </div>
-    Hello
+    
+    <div class="row">
+        <div class="col">
+            <button onclick="add_to_compare();" id="btn">Add</button>
+            <div class="selection_status" id="err_msg">
+            </div>
+        </div>
+        <div class="col">
+            <select name="selection" id="selection" class="selection" multiple="multiple">
+                
+            </select>
+        </div>
+        <div class="col">
+            <button onclick="remove_from_list();" id="btn_red">Remove</button>
+        </div>
+        <div class="col">
+            <button onclick="generate_graph();" id="btn">Generate Graph</button>
+        </div>
+    </div>
+
     {%endblock body%}
 
-    <p>Ninad</p>
 </body>
 </html>
