@@ -4,6 +4,7 @@ from django.http import HttpResponse,JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from models_dir.models import *
 import json
+import random
 
 #from models import SuperAdmins
 
@@ -353,3 +354,67 @@ def getDataValues(request):
             return JsonResponse(request.data)
         
         return JsonResponse(list(data_list) , safe=False)
+
+
+# data generation function 
+#lb- lower bound
+#ub- upper bound
+#status- char either 'I' or 'D' for increasing or decreasing slope & 'R' for random
+def data_gen_function(lb,ub,status):
+    lb=int(lb)
+    ub=int(ub)
+    data_list = []
+    val=0
+    count=0
+    if status=='I':
+        # for increasing slope points
+        while count<20:
+            val = random.randint(lb,ub)
+            data_list.append(val)
+            lb=val
+            count+=1
+        data_list.sort()
+    elif status=='D':
+        # for decreasing slope points
+        while count<20:
+            val=random.randint(lb,ub)
+            data_list.append(val)
+            ub=val
+            count+=1
+        data_list.sort(reverse=True) #gives the points in decreasing order
+    else:
+        # for random points
+        while count<20:
+            val = random.randint(lb,ub)
+            data_list.append(val)
+            count+=1
+        data_list.sort()
+
+    return data_list
+
+
+#wrapper function where you get points values from user
+#function is incomplete and changes need to be made
+def wrap_data_gen(points_list,pattern_name):
+    points_list=list(points_list)
+    length = len(points_list)
+    data_points=[]
+
+
+    if pattern_name=="r_ptn":
+        #random pattern
+        data_points=data_gen_function(points_list[0],points_list[1],'R')
+
+    elif pattern_name=="n_ptn":
+        #N_pattern assuming 4 points
+        #[0]-start/lb
+        # [1]-end/ub
+        # [2]-minima
+        # [3]-maxima
+
+        data_points=data_gen_function(points_list[0],points_list[3],'I')
+        data_points.extend(data_gen_function(points_list[3],points_list[2],'D'))
+        data_points.extend(data_gen_function(points_list[2],points_list[1],'I'))
+
+
+
