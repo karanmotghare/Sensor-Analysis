@@ -32,6 +32,9 @@ urlpatterns = [
     path('getSgAjax', views.getSgAjax, name='getSgAjax'),
     path('getSensorAjax', views.getSensorAjax, name='getSensorAjax'),
     path('getDataValues', views.getDataValues, name='getDataValues'),
-    path('getDataGen', views.data_Gen, name='getDataGen'),
+    path('dataGen', views.dataGen, name='dataGen'),
+    path('option_1_graph', views.option_1_graph, name='option_1_graph'),
+    path('option_2_graph', views.option_2_graph, name='option_2_graph'),
+    # path('getDataGen', views.data_Gen, name='getDataGen'),
 
 ]

@@ -1,10 +1,12 @@
 from django.http.response import HttpResponseRedirect
 from django.shortcuts import redirect,render
 from django.http import HttpResponse,JsonResponse
+from django.views.decorators import csrf
 from django.views.decorators.csrf import csrf_exempt
 from models_dir.models import *
 import json
 import random
+from datetime import datetime, timedelta
 
 #from models import SuperAdmins
 
@@ -424,4 +426,124 @@ def wrap_data_gen(points_list,pattern_name):
         data_points.extend(data_gen_function(points_list[2],points_list[1],'I'))
 
 #################################################################################################################
+
+# Function to redirect to data generation page
+def dataGen(request):
+    if 'user' in request.session:
+        #print(request.session['user'])
+
+        user = Users.objects.filter(username=request.session['user']) 
+        org = user[0].org       
+
+        # Location list
+        locations = Location.objects.filter(org=org)
+
+        mapper={
+            'locations':locations,
+            'heading':'Data Generation Portal',
+            'display':'block'
+        }
+        return render(request,'dataGeneration.html',mapper)
+    else:
+        return HttpResponseRedirect("/")
+
+# Function to create user generated graph for option 1
+@csrf_exempt
+def option_1_graph(request):
+    if request.method == "POST":
+        sensors_data = (json.loads(request.POST['sensors']))["data"]
+        to = datetime.strptime(request.POST["to_time"], '%Y-%m-%d %H:%M:%S')
+        frm = datetime.strptime(request.POST["from_time"], '%Y-%m-%d %H:%M:%S')
+
+        # Initialise the return list
+        data_list = []
+
+        try:
+            if sensors_data:
+
+                # Get the name of sensor
+                values = sensors_data[0].split(',')
+                sensor = Sensor.objects.filter(sensor_id = values[2])
+                name = sensor[0].sensor_name
+
+                # Divide the data equally for the given time interval
+                length = len(sensors_data)
+                
+                time_delta = ((to - frm).total_seconds()) / (length - 1)
+
+                time_list = [frm]
+                curr = frm
+                for x in range(length-1):
+                    curr = curr + timedelta(seconds = time_delta)
+                    time_list.append(curr.strftime('%Y-%m-%d %H:%M:%S'))
+
+                # Create data points with corresponding time
+                lst = []
+                i = 0
+                for point in sensors_data:
+                    val = (point.split(','))[3]
+                    value = {
+                        'x' : time_list[i],
+                        'y' : val
+                    }
+
+                    lst.append(value)
+                    i = i+1
+
+                obj = {
+                    'label' : name,
+                    'data' : lst 
+                }
+
+                data_list.append(obj)
+
+        except Exception:
+            request.data['error_message'] = Exception
+            return JsonResponse(request.data)
+        
+        return JsonResponse(list(data_list) , safe=False)
+
+
+# Function to create user generated graph for option 2
+@csrf_exempt
+def option_2_graph(request):
+    if request.method == "POST":
+        sensors_data = (json.loads(request.POST['sensors']))["data"]
+        
+        # Initialise the return list
+        data_list = []
+
+        try:
+            if sensors_data:
+
+                # Get the name of sensor
+                values = sensors_data[0].split(',')
+                sensor = Sensor.objects.filter(sensor_id = values[2])
+                name = sensor[0].sensor_name
+
+                # Create data points with corresponding time
+                lst = []
+                for point in sensors_data:
+                    arr = point.split(',')
+                    val = arr[3]
+                    time = datetime.strptime(arr[4], '%Y-%m-%d %H:%M:%S')
+                    value = {
+                        'x' : time.strftime('%Y-%m-%d %H:%M:%S'),
+                        'y' : val
+                    }
+
+                    lst.append(value)
+
+                obj = {
+                    'label' : name,
+                    'data' : lst 
+                }
+
+                data_list.append(obj)
+
+        except Exception:
+            request.data['error_message'] = Exception
+            return JsonResponse(request.data)
+        
+        return JsonResponse(list(data_list) , safe=False)
 

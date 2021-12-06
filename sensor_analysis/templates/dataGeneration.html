@@ -10,6 +10,20 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{%static 'index.css' %}">
+
+    <script>
+        $(document).ready(function(){
+          $("#option_1").click(function(){
+            $("#option2").hide();
+            $("#option1").show();
+          });
+          $("#option_2").click(function(){
+            $("#option2").show();
+            $("#option1").hide();
+          });
+        });
+    </script>
+
     <title>Home</title>
 </head>
 
@@ -22,34 +36,162 @@
     {% block body%}
 
     <div class="row">
+        <div class="row">
+            <div class="col">
+                <h2>Location</h2>
+                <div class="col_log">
+                    <select name="location" id="location_list" onchange="change_location();">
+                        <option value="" selected disabled>Select Location</option>
+                        {% for location in locations %}
+                        <option id="loc_opt" value="{{location.loc_id}}">{{location.loc_name}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="col">
+                <h2>Sensor Group</h2>
+                <div class="col_log">
+                    <select name="sensorgrp" id="sngrp_list" onchange="change_sg();">
+                        <option value="" selected disabled>Select Sensor group</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col">
+                <h2>Select Sensor</h2>
+                <div class="col_log">
+                    <select name="sensors" id="sns_list">
+                        <option value="" selected disabled>Select Sensor</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="col">
+                <h2>Generation Type</h2>
+                <div class="col_log">
+                    <select name="gen_type" id="gen_type" onchange="change_gen_type();">
+                        <option value="" selected disabled>Select Generation Type</option>
+                        <option id="type_1" value="type_1">Points (y1, y2, ...) for time interval (t1, t2)</option>
+                        <option id="type_2" value="type_2">Points ((t1, y1), (t2, y2), ...)</option>
+                        
+                    </select>
+                </div>
+                <!-- <form name="dataGenOptions">
+                    <input type="radio" id="option_1" name="dataGenOption" value="option_1" checked="checked" />
+                    <label for="dataGenOption">Points (y1, y2, ...) for time interval (t1, t2) </label><br>
+                    <input type="radio" id="option_2" name="dataGenOption" value="option_2" />
+                    <label for="dataGenOption">Points ((t1, y1), (t2, y2), ...) </label><br>
+                </form> -->
+            </div>
+
+        </div>
+    </div>
+
+    <!-- <div class="row">
         <div class="col">
-        <h2>Time</h2>
-        <div class="col_log">
-    
-            <div class="row" style="margin-left: auto; margin-right: auto;">
-                <div class='row'>
-                    <div class="form-group">
-                        <div class='input-group date' id='datetimepicker6'>
-                            <input id="from_time" type='text' class="form-control" />
-                            <span class="input-group-addon">
-                                <span class="glyphicon glyphicon-calendar"></span>
-                            </span>
+            <form name="dataGenOptions">
+                <input type="radio" id="option_1" name="dataGenOption" value="option_1" checked="checked" />
+                <label for="dataGenOption">Points (y1, y2, ...) for time interval (t1, t2) </label><br>
+                <input type="radio" id="option_2" name="dataGenOption" value="option_2" />
+                <label for="dataGenOption">Points ((t1, y1), (t2, y2), ...) </label><br>
+            </form>
+        </div>
+    </div> -->
+
+    <div class="row option1" id="option1">
+        <div class="col">
+            <h2>Time Interval</h2>
+            <div class="col_log">
+
+                <div class="row" style="margin-left: auto; margin-right: auto;">
+                    <div class='row'>
+                        <div class="form-group">
+                            <div class='input-group date' id='datetimepicker6'>
+                                <input id="from_time" type='text' class="form-control" />
+                                <span class="input-group-addon">
+                                    <span class="glyphicon glyphicon-calendar"></span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class='row'>
+                        <div class="form-group">
+                            <div class='input-group date' id='datetimepicker7'>
+                                <input id="to_time" type='text' class="form-control" />
+                                <span class="input-group-addon">
+                                    <span class="glyphicon glyphicon-calendar"></span>
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
+
         </div>
+
+        <div class="col">
+            <h2>Value</h2>
+            <input class="form-control" type="number" name="data_1" id="data_1" placeholder="Enter Value"><br/>
+            <button onclick="option_1_add_data();" id="btn">Add</button>
         </div>
         <div class="col">
-            <h2>data</h2>
-            <input type="text" name="data" id="data">
+            <select name="selection_1" id="selection_1" class="selection" multiple="multiple">
+            </select><br/>
+            <button onclick="option_1_insert_db();" id="btn">Save</button>
+            <div class="selection_status" id="err_msg">
+            </div>
         </div>
-        <button onclick="AddDataGen();" id="btn">Add</button>
-        <div class="col">
-            <select name="selection" id="selection" class="selection" multiple="multiple">
+
         
-            </select>
+        <div class="col">
+            <button onclick="option_1_remove_from_list();" id="btn_red">Remove</button>
+            <button onclick="option_1_generate_graph();" id="btn">Generate Graph</button>
         </div>
+
+
+    </div>
+
+    <div class="row option2" id="option2">
+        <div class="col">
+            <h2>Time</h2>
+            <div class="col_log">
+
+                <div class="row" style="margin-left: auto; margin-right: auto;">
+                    <div class='row'>
+                        <div class="form-group">
+                            <div class='input-group date' id='datetimepicker8'>
+                                <input id="time" type='text' class="form-control" />
+                                <span class="input-group-addon">
+                                    <span class="glyphicon glyphicon-calendar"></span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col">
+            <h2>Value</h2>
+            <input class="form-control" type="number" name="data_2" id="data_2" placeholder="Enter Value"><br/>
+            <button onclick="option_2_add_data();" id="btn">Add</button>
+        </div>
+        <div class="col">
+            <select name="selection_2" id="selection_2" class="selection" multiple="multiple">
+
+            </select><br/>
+            <button onclick="option_2_insert_db();" id="btn">Save</button>
+            <div class="selection_status" id="err_msg_2">
+            </div>
+        </div>
+
+        
+        <div class="col">
+            <button onclick="option_2_remove_from_list();" id="btn_red">Remove</button>
+            <button onclick="option_2_generate_graph();" id="btn">Generate Graph</button>
+        </div>
+
+
     </div>
 
     {%endblock body%}
