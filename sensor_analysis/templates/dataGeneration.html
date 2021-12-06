@@ -1,0 +1,59 @@
+{% extends 'index.html' %}
+{%load static%}
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{%static 'index.css' %}">
+    <title>Home</title>
+</head>
+
+<body>
+
+    {% block form%}
+
+    {%endblock form%}
+
+    {% block body%}
+
+    <div class="row">
+        <div class="col">
+        <h2>Time</h2>
+        <div class="col_log">
+    
+            <div class="row" style="margin-left: auto; margin-right: auto;">
+                <div class='row'>
+                    <div class="form-group">
+                        <div class='input-group date' id='datetimepicker6'>
+                            <input id="from_time" type='text' class="form-control" />
+                            <span class="input-group-addon">
+                                <span class="glyphicon glyphicon-calendar"></span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+        <div class="col">
+            <h2>data</h2>
+            <input type="text" name="data" id="data">
+        </div>
+        <button onclick="AddDataGen();" id="btn">Add</button>
+        <div class="col">
+            <select name="selection" id="selection" class="selection" multiple="multiple">
+        
+            </select>
+        </div>
+    </div>
+
+    {%endblock body%}
+    
+</body>
+    
+</html>

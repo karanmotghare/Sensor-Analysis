@@ -4,6 +4,7 @@
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -11,13 +12,14 @@
     <link rel="stylesheet" href="{%static 'index.css' %}">
     <title>Home</title>
 </head>
+
 <body>
 
     {% block form%}
-        
+
     {%endblock form%}
 
-    {% block body%} 
+    {% block body%}
     <div class="row">
         <div class="col">
             <h2>Location</h2>
@@ -49,7 +51,7 @@
         <div class="col">
             <h2>Time</h2>
             <div class="col_log">
-                
+
                 <div class="row" style="margin-left: auto; margin-right: auto;">
                     <div class='row'>
                         <div class="form-group">
@@ -72,30 +74,37 @@
                         </div>
                     </div>
                 </div>
-        </div>
-
-    </div>
-    
-    <div class="row">
-        <div class="col">
-            <button onclick="add_to_compare();" id="btn">Add</button>
-            <div class="selection_status" id="err_msg">
             </div>
-        </div>
-        <div class="col">
-            <select name="selection" id="selection" class="selection" multiple="multiple">
-                
-            </select>
-        </div>
-        <div class="col">
-            <button onclick="remove_from_list();" id="btn_red">Remove</button>
-        </div>
-        <div class="col">
-            <button onclick="generate_graph();" id="btn">Generate Graph</button>
-        </div>
-    </div>
 
-    {%endblock body%}
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <button onclick="add_to_compare();" id="btn">Add</button>
+                <div class="selection_status" id="err_msg">
+                </div>
+            </div>
+            <div class="col">
+                <select name="selection" id="selection" class="selection" multiple="multiple">
+
+                </select>
+            </div>
+            <div class="col">
+                <button onclick="remove_from_list();" id="btn_red">Remove</button>
+            </div>
+            <div class="col">
+                <button onclick="generate_graph();" id="btn">Generate Graph</button>
+            </div>
+
+        </div>
+
+        <div class="row">
+            <button onclick="data_Gen()" id="btn">Generate User Data</button>
+        </div>
+        
+
+        {%endblock body%}
 
 </body>
+
 </html>

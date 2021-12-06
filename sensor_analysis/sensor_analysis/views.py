@@ -276,6 +276,12 @@ def chart_js(request):
 
     return render(request,'chartdemo.html')
 
+def data_Gen(request):
+    mapper ={ 
+    'heading':'Data Generation Portal',
+    }
+    return render(request,'dataGeneration.html',mapper)
+
 # Function to load sensor groups
 @csrf_exempt
 def getSgAjax(request):
@@ -393,6 +399,7 @@ def data_gen_function(lb,ub,status):
     return data_list
 
 
+############################################################################################################################
 #wrapper function where you get points values from user
 #function is incomplete and changes need to be made
 def wrap_data_gen(points_list,pattern_name):
@@ -416,5 +423,5 @@ def wrap_data_gen(points_list,pattern_name):
         data_points.extend(data_gen_function(points_list[3],points_list[2],'D'))
         data_points.extend(data_gen_function(points_list[2],points_list[1],'I'))
 
-
+#################################################################################################################
 
