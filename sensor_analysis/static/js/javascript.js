@@ -240,16 +240,7 @@ function generate_graph(){
                 var newWindow = window.open('chartJS');
                 
                 localStorage.setItem('sensors_data', JSON.stringify(sensors_data));
-                
-                // $.ajax({
-                //     type: "POST",
-                //     url: 'redirectChart',
-                //     data:{
-                //         'sensors_data':JSON.stringify(sensors_data),
-                //         'csrfmiddlewaretoken': '{{ csrf_token }}'
-                //     }
-
-                // })
+    
             }
 
         })
@@ -331,6 +322,49 @@ function displayGraph(){
         }
     });
 
+    // Calculate statistics for displayed graph
+    $.ajax({
+        type: "POST",
+        url: 'getStatistics',
+        data: {
+            'sensors_data' : localStorage.getItem('sensors_data'),
+            'csrfmiddlewaretoken': '{{ csrf_token }}',
+        },
+
+        success: function(table){
+            console.log("Statistics calculated");
+            // console.log(typeof table)
+            // table = JSON.parse(table_data);
+            titles = Object.keys(table[0])
+            // console.log(Object.keys(table[0]));
+
+            // Create table in html
+            let html_data = '';
+
+            // let i = 0;
+
+            for(row in table[0]){
+                html_data += '<tr>'
+                console.log(row);
+                html_data += `<th>${row}</th>`
+                // console.log(table[0][row]);
+                for (col in table[0][row]){
+                    console.log(table[0][row][col]);
+                    html_data += `<td>${table[0][row][col]}</td>`
+                }
+                html_data += '</tr>'
+            }
+
+            // sg.forEach(function (sg) {
+                // html_data += `<option id="sgrp_id" value="${sg.sg_id}">${sg.sg_name}</option>`
+            // });
+
+            var sengrp = document.getElementById('stats');
+            // console.log(sengrp.innerHTML)
+            sengrp.innerHTML = html_data;
+            
+        }
+    });
 
 
     // console.log(JSON.parse(sensors_data));
@@ -437,7 +471,7 @@ function option_1_generate_graph(){
     var list = document.getElementById('selection_1').options;
     console.log(list);
 
-    if(!from_time || !to_time || !list.length)
+    if(!from_time || !to_time || (list.length<2))
     {
         console.log("Invalid Selection !");
     }
@@ -495,7 +529,70 @@ function option_1_generate_graph(){
 
 // Save the graph in database
 function option_1_insert_db(){
-    return 0
+    var from_time = document.getElementById('from_time').value;
+    var to_time = document.getElementById('to_time').value;
+    var list = document.getElementById('selection_1').options;
+    console.log(list);
+
+    if(!from_time || !to_time || (list.length<2))
+    {
+        console.log("Invalid Selection !");
+        status_box = document.getElementById('status_box');
+        // selected_data = status_box.innerHTML;
+        selected_data = `Enter all Parameters`;
+        status_box.innerHTML = selected_data;
+    }
+    else
+    {
+        // String to js Date
+        console.log("From time ",from_time);
+        from = new Date(from_time);
+        to = new Date(to_time);
+        console.log("From entry ");
+        console.log(from[0]);
+
+        // Converting to mysql format
+        from_mysql = moment(from).format('YYYY-MM-DD HH:mm:ss');
+        to_mysql = moment(to).format('YYYY-MM-DD HH:mm:ss');
+
+        console.log(from, to);
+        console.log(from_mysql, to_mysql);
+        //console.log(typeof fr);
+
+        // Get data from db using ajax
+        data = new Array(list.length);
+        for(var i=0; i<list.length; i++)
+        {
+            data[i] = list[i].value
+            //data[i] = (list[i].value).split(",").map(Number);
+        }
+
+        data_list = {"data" : data}
+
+        console.log(JSON.stringify(data_list));
+    
+        $.ajax({
+            type: "POST",
+            url: 'option_1_insert_db',
+            data: {
+                'sensors' : JSON.stringify(data_list),
+                'from_time' : from_mysql,
+                'to_time' : to_mysql,
+                'csrfmiddlewaretoken': '{{ csrf_token }}',
+            },
+
+            success: function(version){
+                console.log("Saved as : ", version);
+                
+                status_box = document.getElementById('status_box');
+                // selected_data = status_box.innerHTML;
+                selected_data = `Data saved as Version Number : <b>${version}</b>`;
+                status_box.innerHTML = selected_data;
+            }
+
+        })
+        
+    }
 }
 
 // Option 2 : Enter values for a value for given time
@@ -596,7 +693,7 @@ function option_2_generate_graph(){
     var list = document.getElementById('selection_2').options;
     console.log(list);
 
-    if(!list.length)
+    if(list.length<2)
     {
         console.log("Invalid Selection !");
     }
@@ -629,6 +726,56 @@ function option_2_generate_graph(){
                 var newWindow = window.open('chartJS');
                 
                 localStorage.setItem('sensors_data', JSON.stringify(sensors_data));
+                
+            }
+
+        })
+        
+    }
+}
+
+function option_2_insert_db(){
+    var list = document.getElementById('selection_2').options;
+    console.log(list);
+
+    if(list.length<2)
+    {
+        console.log("Invalid Selection !");
+        status_box = document.getElementById('status_box');
+        // selected_data = status_box.innerHTML;
+        selected_data = `Enter all Parameters`;
+        status_box.innerHTML = selected_data;
+    }
+    else
+    {
+        // Get data from db using ajax
+        data = new Array(list.length);
+        for(var i=0; i<list.length; i++)
+        {
+            data[i] = list[i].value
+            //data[i] = (list[i].value).split(",").map(Number);
+        }
+
+        data_list = {"data" : data}
+
+        console.log(JSON.stringify(data_list));
+    
+        $.ajax({
+            type: "POST",
+            url: 'option_2_insert_db',
+            data: {
+                'sensors' : JSON.stringify(data_list),
+                'csrfmiddlewaretoken': '{{ csrf_token }}',
+            },
+
+            success: function(version){
+
+                console.log("Saved as : ", version);
+
+                status_box = document.getElementById('status_box');
+                // selected_data = status_box.innerHTML;
+                selected_data = `Data saved as Version Number : <b>${version}</b>`;
+                status_box.innerHTML = selected_data;
                 
             }
 

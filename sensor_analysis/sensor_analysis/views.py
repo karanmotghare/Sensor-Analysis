@@ -3,10 +3,14 @@ from django.shortcuts import redirect,render
 from django.http import HttpResponse,JsonResponse
 from django.views.decorators import csrf
 from django.views.decorators.csrf import csrf_exempt
+from django.db.models import Max
 from models_dir.models import *
 import json
 import random
 from datetime import datetime, timedelta
+import numpy
+from scipy import stats
+from statsmodels.tsa.stattools import adfuller
 
 #from models import SuperAdmins
 
@@ -447,6 +451,21 @@ def dataGen(request):
     else:
         return HttpResponseRedirect("/")
 
+# Function to save the generated data
+def saveGenData(data, sensor):
+
+    versions = SensorGenData.objects.filter(sensor = sensor)
+    latest_v = 0
+
+    ver = versions.aggregate(Max('version_id'))
+    
+    if ver['version_id__max']:
+        latest_v = ver['version_id__max']
+    
+    current = latest_v + 1
+
+    return current
+
 # Function to create user generated graph for option 1
 @csrf_exempt
 def option_1_graph(request):
@@ -503,6 +522,63 @@ def option_1_graph(request):
         
         return JsonResponse(list(data_list) , safe=False)
 
+@csrf_exempt
+def option_1_insert_db(request):
+    if request.method == "POST":
+        sensors_data = (json.loads(request.POST['sensors']))["data"]
+        to = datetime.strptime(request.POST["to_time"], '%Y-%m-%d %H:%M:%S')
+        frm = datetime.strptime(request.POST["from_time"], '%Y-%m-%d %H:%M:%S')
+
+        # Initialise the return list
+        data_list = []
+
+        try:
+            if sensors_data:
+
+                # Get the name of sensor
+                values = sensors_data[0].split(',')
+                sensor = Sensor.objects.filter(sensor_id = values[2])
+                name = sensor[0].sensor_name
+
+                # Divide the data equally for the given time interval
+                length = len(sensors_data)
+                
+                time_delta = ((to - frm).total_seconds()) / (length - 1)
+
+                time_list = [frm]
+                curr = frm
+                for x in range(length-1):
+                    curr = curr + timedelta(seconds = time_delta)
+                    time_list.append(curr.strftime('%Y-%m-%d %H:%M:%S'))
+
+                # Create data points with corresponding time
+                lst = []
+                i = 0
+                for point in sensors_data:
+                    val = (point.split(','))[3]
+                    value = {
+                        'x' : time_list[i],
+                        'y' : int(val)
+                    }
+
+                    lst.append(value)
+                    i = i+1
+
+                version_id = saveGenData(lst, sensor[0])
+
+                # obj = {
+                #     'label' : name,
+                #     'data' : lst 
+                # }
+
+                # data_list.append(obj)
+
+        except Exception:
+            request.data['error_message'] = Exception
+            return JsonResponse(request.data)
+        
+        return JsonResponse(version_id , safe=False)
+
 
 # Function to create user generated graph for option 2
 @csrf_exempt
@@ -547,3 +623,133 @@ def option_2_graph(request):
         
         return JsonResponse(list(data_list) , safe=False)
 
+@csrf_exempt
+def option_2_insert_db(request):
+    if request.method == "POST":
+        sensors_data = (json.loads(request.POST['sensors']))["data"]
+        
+        # Initialise the return list
+        data_list = []
+
+        try:
+            if sensors_data:
+
+                # Get the name of sensor
+                values = sensors_data[0].split(',')
+                sensor = Sensor.objects.filter(sensor_id = values[2])
+                name = sensor[0].sensor_name
+
+                # Create data points with corresponding time
+                lst = []
+                for point in sensors_data:
+                    arr = point.split(',')
+                    val = arr[3]
+                    time = datetime.strptime(arr[4], '%Y-%m-%d %H:%M:%S')
+                    value = {
+                        'x' : time.strftime('%Y-%m-%d %H:%M:%S'),
+                        'y' : val
+                    }
+
+                    lst.append(value)
+
+                version_id = saveGenData(lst, sensor[0])
+
+                # obj = {
+                #     'label' : name,
+                #     'data' : lst 
+                # }
+
+                # data_list.append(obj)
+
+        except Exception:
+            request.data['error_message'] = Exception
+            return JsonResponse(request.data)
+        
+        return JsonResponse(version_id , safe=False)
+
+# Function to calculate statistics
+def num_unique(data):
+    return len(set(data))
+
+def mean_val(data):
+    return numpy.mean(data)
+
+def quartile_val(data, num):
+    return numpy.percentile(data, num)
+
+def mode_val(data):
+    print((stats.mode(data)).mode[0])
+    return int((stats.mode(data)).mode[0])
+
+def std_val(data):
+    return numpy.std(data)
+
+@csrf_exempt
+def getStatistics(request):
+    if request.method == "POST":
+        sensors_data = json.loads(request.POST['sensors_data']) 
+        # print(sensors_data)
+        
+        # Initialise the return list
+        data_list = [{
+            'titles' : [],
+            'count' : [],
+            'unique' : [],
+            'mean' : [],
+            'std' : [],
+            'min' : [],
+            '25%' : [],
+            'median' : [],
+            '75%' : [],
+            'max' : [],
+            'mode' : []
+        }]
+
+        # For each sensor in the list of data
+        for sensor in sensors_data:
+
+            # Add sensor name
+            data_list[0]['titles'].append(sensor['label'])
+
+            # Add count of data
+            data_list[0]['count'].append(len(sensor['data']))
+            # print(len(sensor['data']))
+
+            # Calculate unique values
+            data_points = [ int(data['y']) for data in sensor['data'] ]
+            # print(data_points)
+            data_list[0]['unique'].append(num_unique(data_points))
+
+            # Calculate mean
+            data_list[0]['mean'].append(mean_val(data_points))
+            
+            # Calculate 25 percentile
+            data_list[0]['25%'].append(quartile_val(data_points, 25))
+
+            # Calculate median
+            data_list[0]['median'].append(quartile_val(data_points, 50))
+
+            # Calculate 75 percentile
+            data_list[0]['75%'].append(quartile_val(data_points, 75))
+
+            # Calculate max value
+            data_list[0]['max'].append(max(data_points))
+
+            # Calculate min value
+            data_list[0]['min'].append(min(data_points))
+
+            # Calculate mode value
+            data_list[0]['mode'].append(mode_val(data_points))
+
+            # Calculate standard deviation
+            data_list[0]['std'].append(std_val(data_points))
+
+        print(data_list)
+        
+        return JsonResponse(list(data_list) , safe=False)
+
+def getADFT(data):
+
+    data = [3, 4, 4, 5, 6, 7, 6, 6, 7, 8, 9, 12, 10]
+
+    print(adfuller(data))

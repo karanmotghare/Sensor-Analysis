@@ -136,7 +136,7 @@
         <div class="col">
             <select name="selection_1" id="selection_1" class="selection" multiple="multiple">
             </select><br/>
-            <button onclick="option_1_insert_db();" id="btn">Save</button>
+            <button onclick="option_1_insert_db();" id="btn" data-toggle="modal" data-target="#statusModal">Save</button>
             <div class="selection_status" id="err_msg">
             </div>
         </div>
@@ -180,7 +180,7 @@
             <select name="selection_2" id="selection_2" class="selection" multiple="multiple">
 
             </select><br/>
-            <button onclick="option_2_insert_db();" id="btn">Save</button>
+            <button onclick="option_2_insert_db();" id="btn" data-toggle="modal" data-target="#statusModal">Save</button>
             <div class="selection_status" id="err_msg_2">
             </div>
         </div>
@@ -192,6 +192,27 @@
         </div>
 
 
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="statusModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <!-- <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Status</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div> -->
+                <div class="modal-body" id="status_box">
+                    Hey There
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+                    <!-- <button type="button" class="btn btn-primary">OK</button> -->
+                </div>
+            </div>
+        </div>
     </div>
 
     {%endblock body%}
