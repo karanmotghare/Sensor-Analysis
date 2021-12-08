@@ -748,8 +748,12 @@ def getStatistics(request):
         
         return JsonResponse(list(data_list) , safe=False)
 
+@csrf_exempt
 def getADFT(data):
 
     data = [3, 4, 4, 5, 6, 7, 6, 6, 7, 8, 9, 12, 10]
-
+    data_2 = [3,4,3,4,2,4,3,4,3,4,3,4,3,4]
     print(adfuller(data))
+    print(adfuller(data_2))
+
+    return JsonResponse(adfuller(data) , safe=False)
