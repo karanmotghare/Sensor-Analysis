@@ -77,33 +77,41 @@
             </div>
 
         </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <button onclick="add_to_compare();" id="btn">Add</button>
+            <div class="selection_status" id="err_msg">
+            </div>
+        </div>
+        <div class="col">
+            <select name="selection" id="selection" class="selection" multiple="multiple">
 
-        <div class="row">
-            <div class="col">
-                <button onclick="add_to_compare();" id="btn">Add</button>
-                <div class="selection_status" id="err_msg">
-                </div>
-            </div>
-            <div class="col">
-                <select name="selection" id="selection" class="selection" multiple="multiple">
-
-                </select>
-            </div>
-            <div class="col">
-                <button onclick="remove_from_list();" id="btn_red">Remove</button>
-            </div>
-            <div class="col">
-                <button onclick="generate_graph();" id="btn">Generate Graph</button>
-            </div>
-
+            </select>
+        </div>
+        <div class="col">
+            <button onclick="remove_from_list();" id="btn_red">Remove</button>
+        </div>
+        <div class="col">
+            <button onclick="generate_graph();" id="btn">Generate Graph</button>
         </div>
 
-        <div class="row">
-            <button onclick="data_Gen()" id="btn">Generate User Data</button>
-        </div>
-        
+    </div>
 
-        {%endblock body%}
+    <div class="row">
+        <a class="btn" href="{% url 'dataGen' %}" id="btn">Generate User Data</a>
+    </div>
+    
+    <div class="row" id="analysis_div" style="padding: 6%;">
+        <h2>Time Series Analysis</h2><br/>
+        <ul>
+            <li>
+                <a href="#" id="">Augmented Dickey-Fuller Test (Stationarity of the series)</a>
+            </li>
+        </ul>
+    </div>
+
+    {%endblock body%}
 
 </body>
 

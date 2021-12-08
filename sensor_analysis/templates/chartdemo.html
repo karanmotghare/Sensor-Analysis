@@ -9,6 +9,8 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js" integrity="sha512-qTXRIMyZIFb8iQcfjXWCO8+M5Tbc38Qi5WzdPOYZHIlZpzBHG3L3by84BBBOiRGiEb7KKtAOAs5qYdUiZiQNNQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.js" integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc=" crossorigin="anonymous"></script>
+    <link rel="stylesheet" type="text/css" media="screen" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css" />
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
     <script src="../static/js/javascript.js"></script>
@@ -113,8 +115,16 @@
     </script> -->
 
 
-    <div style="width: 1000px; height: 1000px;">
+    <div style="width: 100%; padding: 10%; height: auto;">
+        <h2>GRAPH</h2>
         <canvas id="new_chart"></canvas>
+    </div>
+
+    <div id='stats_div' style="padding: 10%;">
+        <h2>STATS</h2>
+        <table class="table table-striped" id='stats'>
+            
+        </table>
     </div>
     <script>
         displayGraph();

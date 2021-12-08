@@ -319,3 +319,11 @@ input{
 .list-unstyled :hover{
     background-color: transparent;
 }
+
+#option1 {
+    display: none;
+}
+
+#option2 {
+    display: none;
+}
