@@ -291,6 +291,7 @@ function displayGraph(){
             label: sensors_data[i]['label'],
             borderColor: getRandomColor(),
             fill: false,
+            tension: 0,
             data: data
         };
 
@@ -782,4 +783,39 @@ function option_2_insert_db(){
         })
         
     }
+}
+
+function get_ADFT(){
+    console.log("Function called...");
+
+    $.ajax({
+        type: "POST",
+        url: 'getADFT',
+        data: {
+            // 'sensors' : JSON.stringify(data_list),
+            'csrfmiddlewaretoken': '{{ csrf_token }}',
+        },
+
+        success: function(result){
+
+            // console.log("Saved as : ", version);
+
+            console.log(result);
+            console.log(typeof result);
+            console.log(result[1]);
+
+            verdict = "Non-Stationary Series";
+            if(result[1]<=0.05){
+                verdict = "Stationary Series";
+            }
+
+            status_box = document.getElementById('ADFT_box');
+            // // selected_data = status_box.innerHTML;
+            selected_data = `p-value : <b>${result[1]}</b><br/>`;
+            selected_data += `Verdict : <b>${verdict}</b>`;
+            status_box.innerHTML = selected_data;
+            
+        }
+
+    })
 }
