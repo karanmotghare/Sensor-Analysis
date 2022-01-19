@@ -291,6 +291,7 @@ function displayGraph(){
             label: sensors_data[i]['label'],
             borderColor: getRandomColor(),
             fill: false,
+            tension: 0,
             data: data
         };
 
@@ -782,4 +783,125 @@ function option_2_insert_db(){
         })
         
     }
+}
+
+function get_ADFT(){
+    console.log("Function called...");
+
+    var from_time = document.getElementById('from_time').value;
+    var to_time = document.getElementById('to_time').value;
+    var list = document.getElementById('selection').options;
+    console.log(list);
+
+    if(!from_time || !to_time || !list.length)
+    {
+        console.log("Invalid Selection !");
+    }
+    else
+    {
+        // String to js Date
+        console.log("From time ",from_time);
+        from = new Date(from_time);
+        to = new Date(to_time);
+        console.log("From entry ");
+        console.log(from[0]);
+
+        // Converting to mysql format
+        from_mysql = moment(from).format('YYYY-MM-DD HH:mm:ss');
+        to_mysql = moment(to).format('YYYY-MM-DD HH:mm:ss');
+
+        console.log(from, to);
+        console.log(from_mysql, to_mysql);
+        //console.log(typeof fr);
+
+        // Get data from db using ajax
+        data = new Array(list.length);
+        var j = 0;
+        for(var i=0; i<list.length; i++)
+        {
+            if(list[i].selected)
+            {
+                data[j++] = list[i].value;
+                break;
+            }
+            //data[i] = (list[i].value).split(",").map(Number);
+        }
+
+        if(j==0)
+        {
+            console.log("Select an option from bucket list !");
+        }
+        else
+        {
+            data_list = {"data" : data};
+
+            console.log(JSON.stringify(data_list));
+            
+            $.ajax({
+                type: "POST",
+                url: 'getDataValues',
+                data: {
+                    'sensors' : JSON.stringify(data_list),
+                    'from_time' : from_mysql,
+                    'to_time' : to_mysql,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}',
+                },
+
+                success: function(sensors_data){
+                    console.log(sensors_data);
+                    // var newWindow = window.open('chartJS');
+                    
+                    // localStorage.setItem('sensors_data', JSON.stringify(sensors_data));
+                    data_list = {"data" : sensors_data};
+
+                    $.ajax({
+                        type: "POST",
+                        url: 'getADFT',
+                        data: {
+                            'sensor_data' : JSON.stringify(data_list),
+                            'csrfmiddlewaretoken': '{{ csrf_token }}',
+                        },
+                
+                        success: function(result){
+                
+                            // console.log("Saved as : ", version);
+                
+                            console.log(result);
+                            console.log(typeof result);
+                            console.log(result[1]);
+                
+                            verdict = "Non-Stationary Series";
+                            if(result[1]<=0.05){
+                                verdict = "Stationary Series";
+                            }
+                
+                            status_box = document.getElementById('ADFT_box');
+                            // // selected_data = status_box.innerHTML;
+                            selected_data = `p-value : <b>${result[1]}</b><br/>`;
+                            selected_data += `Verdict : <b>${verdict}</b>`;
+                            status_box.innerHTML = selected_data;
+                            
+                        },
+                        error: function(data, status, error){
+
+                            status_box = document.getElementById('ADFT_box');
+                            // // selected_data = status_box.innerHTML;
+                            console.log(data)
+                            selected_data = `<b>${data.responseJSON}</b><br/>`;
+                            status_box.innerHTML = selected_data;
+                        }
+                
+                    });
+        
+                }
+
+            })
+        }
+
+        
+        
+    }
+
+
+    
 }
