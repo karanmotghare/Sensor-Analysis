@@ -454,6 +454,7 @@ def dataGen(request):
 # Function to save the generated data
 def saveGenData(data, sensor):
 
+    # Get the latest saved version in the database
     versions = SensorGenData.objects.filter(sensor = sensor)
     latest_v = 0
 
@@ -463,6 +464,18 @@ def saveGenData(data, sensor):
         latest_v = ver['version_id__max']
     
     current = latest_v + 1
+
+    # Saving each row
+    for i in range(len(data) - 1):
+
+        try:
+            row = SensorGenData(sensor=sensor, version_id=current, from_data=data[i]['y'], to_data=data[i+1]['y'], from_time=data[i]['x'], to_time=data[i+1]['x'])
+            row.save()
+        except Exception:
+            print(Exception)
+            return current
+
+
 
     return current
 
@@ -749,11 +762,23 @@ def getStatistics(request):
         return JsonResponse(list(data_list) , safe=False)
 
 @csrf_exempt
-def getADFT(data):
+def getADFT(request):
 
-    data = [3, 4, 4, 5, 6, 7, 6, 6, 7, 8, 9, 12, 10]
-    data_2 = [3,4,3,4,2,4,3,4,3,4,3,4,3,4]
-    print(adfuller(data))
-    print(adfuller(data_2))
+    try:
+        sensors_data = (json.loads(request.POST['sensor_data']))["data"]
+
+        # print(type(sensors_data[0]))
+
+        data = [val['y'] for val in sensors_data[0]['data']]
+        print(data)
+        # data = [3, 4, 4, 5, 6, 7, 6, 6, 7, 8, 9, 12, 10]
+        # data_2 = [3,4,3,4,2,4,3,4,3,4,3,4,3,4]
+        print(adfuller(data))
+
+    except Exception as e:
+        print(e)
+        response = JsonResponse(str(e), safe=False)
+        response.status_code = 400
+        return response
 
     return JsonResponse(adfuller(data) , safe=False)
