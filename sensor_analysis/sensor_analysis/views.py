@@ -1,3 +1,4 @@
+from operator import ne
 from django.http.response import HttpResponseRedirect
 from django.shortcuts import redirect,render
 from django.http import HttpResponse,JsonResponse
@@ -640,9 +641,6 @@ def option_2_graph(request):
 def option_2_insert_db(request):
     if request.method == "POST":
         sensors_data = (json.loads(request.POST['sensors']))["data"]
-        
-        # Initialise the return list
-        data_list = []
 
         try:
             if sensors_data:
@@ -680,22 +678,145 @@ def option_2_insert_db(request):
         
         return JsonResponse(version_id , safe=False)
 
+
+# Function to create user generated graph for option 3
+@csrf_exempt
+def option_3_graph(request):
+
+    if request.method=="POST":
+        sensors_data = (json.loads(request.POST['values']))["data"]
+        timestamps = (json.loads(request.POST['timestamp']))["data"]
+        name = request.POST["name"]
+
+        # Initialise the return list
+        data_list = []
+
+        try:
+            if sensors_data:
+
+                # Create data points with corresponding time
+                lst = []
+
+                for i in range(len(sensors_data)):
+                    time = datetime.strptime(timestamps[i], '%Y-%m-%d %H:%M:%S')
+                    value = {
+                        'x' : time.strftime('%Y-%m-%d %H:%M:%S'),
+                        'y' : sensors_data[i]
+                    }
+
+                    lst.append(value)
+
+                obj = {
+                    'label' : name,
+                    'data' : lst 
+                }
+
+                data_list.append(obj)
+
+        except Exception:
+            request.data['error_message'] = Exception
+            return JsonResponse(request.data)
+        
+        return JsonResponse(list(data_list) , safe=False)
+
+@csrf_exempt
+def option_3_insert_db(request):
+    if request.method=="POST":
+        sensors_data = (json.loads(request.POST['values']))["data"]
+        timestamps = (json.loads(request.POST['timestamp']))["data"]
+        name = request.POST["name"]
+        sensor_id = int(request.POST["id"])
+
+        # Initialise the return list
+        data_list = []
+
+        try:
+            if sensors_data:
+
+                sensor = Sensor.objects.filter(sensor_id = sensor_id)
+                # Create data points with corresponding time
+                lst = []
+
+                for i in range(len(sensors_data)):
+                    time = datetime.strptime(timestamps[i], '%Y-%m-%d %H:%M:%S')
+                    value = {
+                        'x' : time.strftime('%Y-%m-%d %H:%M:%S'),
+                        'y' : sensors_data[i]
+                    }
+
+                    lst.append(value)
+
+                version_id = saveGenData(lst, sensor[0])
+
+                # obj = {
+                #     'label' : name,
+                #     'data' : lst 
+                # }
+
+                # data_list.append(obj)
+
+        except Exception:
+            request.data['error_message'] = Exception
+            return JsonResponse(request.data)
+        
+        return JsonResponse(version_id , safe=False)
+
+
+# Function to create user generated graph for option 3
+@csrf_exempt
+def option_4_graph(request):
+    if request.method=="POST":
+        sensors_data = (json.loads(request.POST['values']))["data"]
+        timestamps = (json.loads(request.POST['timestamp']))["data"]
+        name = request.POST["name"]
+
+        # Initialise the return list
+        data_list = []
+
+        try:
+            if sensors_data:
+
+                # Create data points with corresponding time
+                lst = []
+
+                for i in range(len(sensors_data)):
+                    time = timestamps[i] #datetime.strptime(timestamps[i], '%Y-%m-%d %H:%M:%S')
+                    value = {
+                        'x' : time,
+                        'y' : sensors_data[i]
+                    }
+
+                    lst.append(value)
+
+                obj = {
+                    'label' : name,
+                    'data' : lst 
+                }
+
+                data_list.append(obj)
+
+        except Exception:
+            request.data['error_message'] = Exception
+            return JsonResponse(request.data)
+        
+        return JsonResponse(list(data_list) , safe=False)
+
 # Function to calculate statistics
 def num_unique(data):
     return len(set(data))
 
 def mean_val(data):
-    return numpy.mean(data)
+    return round(numpy.mean(data), 2)
 
 def quartile_val(data, num):
-    return numpy.percentile(data, num)
+    return round(numpy.percentile(data, num), 2)
 
 def mode_val(data):
     print((stats.mode(data)).mode[0])
     return int((stats.mode(data)).mode[0])
 
 def std_val(data):
-    return numpy.std(data)
+    return round(numpy.std(data), 2)
 
 @csrf_exempt
 def getStatistics(request):
@@ -759,7 +880,30 @@ def getStatistics(request):
 
         print(data_list)
         
-        return JsonResponse(list(data_list) , safe=False)
+        # Converting the list to a particular format
+        result = [list(data_list[0].keys())]
+        
+        for i in range(len(sensors_data)):
+            new_row = []
+
+            new_row.append(data_list[0]['titles'][i])
+            new_row.append(data_list[0]['count'][i])
+            new_row.append(data_list[0]['unique'][i])
+            new_row.append(data_list[0]['mean'][i])
+            new_row.append(data_list[0]['std'][i])
+            new_row.append(data_list[0]['min'][i])
+            new_row.append(data_list[0]['25%'][i])
+            new_row.append(data_list[0]['median'][i])
+            new_row.append(data_list[0]['75%'][i])
+            new_row.append(data_list[0]['max'][i])
+            new_row.append(data_list[0]['mode'][i])
+            
+
+            result.append(new_row)
+
+        print(result)
+
+        return JsonResponse(list(result) , safe=False)
 
 @csrf_exempt
 def getADFT(request):
