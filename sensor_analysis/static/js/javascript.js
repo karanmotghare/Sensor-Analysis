@@ -271,6 +271,57 @@ function getRandomColor() {
     return color;
 }
 
+// Function to return regression chart
+function regression_chart(dataset, id, order, eq_id){
+    var reg = document.getElementById(id).getContext('2d');
+    var chart = new Chart(reg, {
+        type: 'line',
+        plugins: [
+            ChartRegressions
+        ],
+        data: { datasets: dataset },
+        options: {
+            scales: {
+            xAxes: [{
+                type: 'linear'//localStorage.getItem('chart_type')//'linear'
+            }]
+            },
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                title: {
+                    display: true,
+                    text: 'Chart.js Line Chart'
+                },
+                regressions: {
+                    type: 'polynomial',
+                    line: { color: getRandomColor(), width: 3},
+                    calculation: { precision:5, order:order}
+                },
+            }
+        }
+    });
+    // console.log(chart);
+
+    eq = '';
+    for(var i=0; i<regression_datasets.length; i++){
+        section = ChartRegressions.getSections(chart, i);
+        // console.log(section);
+        // console.log(section[0]['result']['string']);
+        eq += `<tr>`;
+        eq += `<td>${regression_datasets[i]["label"]}</td>`;
+        eq += `<td>${section[0]['result']['string']}</td>`;
+        eq += `</tr>`;
+    }
+
+    lin_eq = document.getElementById(eq_id);
+    lin_eq.innerHTML = eq;
+
+    return chart;
+}
+
 // Display Graph
 function displayGraph(){
     console.log("New window opened");
@@ -282,8 +333,8 @@ function displayGraph(){
     // For every sensor
     for(var i=0; i<sensors_data.length; i++)
     {
-        console.log(sensors_data[i]);
-        console.log(sensors_data[i]['label']);
+        // console.log(sensors_data[i]);
+        // console.log(sensors_data[i]['label']);
 
         var data = [];
 
@@ -303,17 +354,26 @@ function displayGraph(){
             borderColor: getRandomColor(),
             fill: false,
             tension: 0,
+            // regressions: {
+            //     type: 'polynomial',
+            //     line: { color: 'red', width: 3},
+            //     calculation: { precision:5, order:1}
+            //   },
             data: data
         };
 
         dataset.push(obj);
 
     }
-      
+
+    Chart.plugins.register(ChartRegressions);
+    
     var ctx = document.getElementById('new_chart').getContext('2d');
-    console.log(ctx)
     var chart = new Chart(ctx, {
         type: 'line',
+        plugins: [
+            ChartRegressions
+        ],
         data: { datasets: dataset },
         options: {
             scales: {
@@ -333,7 +393,7 @@ function displayGraph(){
             }
         }
     });
-
+    // console.log(chart);
 
     // Calculate statistics for displayed graph
     $.ajax({
@@ -374,21 +434,24 @@ function displayGraph(){
         }
     });
 
+
+    // Moving average curve
     mov_avg_dataset = Array.from(dataset);
 
     for (var i = 0; i < sensors_data.length; i++) {
-        console.log(sensors_data[i]);
-        console.log(sensors_data[i]['label']);
+        // console.log(sensors_data[i]);
+        // console.log(sensors_data[i]['label']);
 
         var data = [];
 
         var values  = [];
+        var num = sensors_data[i]['data'].length;
         // For every date-value pair for that sensor
         for (var j = 0; j < sensors_data[i]['data'].length; j++) {
             values.push(sensors_data[i]['data'][j]['y']);          
         };
         
-        result = movingAvg(values,2);
+        result = movingAvg(values, (num/20));
         
         for (var j = 0; j < sensors_data[i]['data'].length; j++) {
             var val = {
@@ -410,10 +473,10 @@ function displayGraph(){
         
 
     }
-    console.log(dataset);
+    // console.log(dataset);
 
     var ctxx = document.getElementById('mov_avg_chart').getContext('2d');
-    console.log(ctx)
+    // console.log(ctx)
     var chart = new Chart(ctxx, {
         type: 'line',
         data: { datasets: mov_avg_dataset },
@@ -435,6 +498,50 @@ function displayGraph(){
             }
         }
     });
+
+
+    // Linear Regression Curve
+    regression_datasets = [];
+    // For every sensor
+    for(var i=0; i<sensors_data.length; i++)
+    {
+        // console.log(sensors_data[i]);
+        // console.log(sensors_data[i]['label']);
+
+        var data = [];
+
+        // For every date-value pair for that sensor
+        for(var j=0; j<sensors_data[i]['data'].length; j++)
+        {
+            var val = {
+                    x : j+1,
+                    y : sensors_data[i]['data'][j]['y']
+                };
+            
+            data.push(val);
+        };
+
+        var obj = {
+            label: sensors_data[i]['label'],
+            borderColor: getRandomColor(),
+            fill: false,
+            tension: 0,
+            regressions: {
+                type: 'polynomial',
+                line: { color: getRandomColor(), width: 3},
+                // calculation: { precision:5, order:1}
+              },
+            data: data
+        };
+
+        regression_datasets.push(obj);
+
+    }
+
+
+    var lin_reg = regression_chart(regression_datasets, 'linear_reg_chart', 1, 'linear_eq');
+    var quad_reg = regression_chart(regression_datasets, 'quad_reg_chart', 2, 'quad_eq');
+    var third_reg = regression_chart(regression_datasets, 'third_reg_chart', 3, 'third_eq');
 
 }
 
@@ -1330,7 +1437,7 @@ function option_4_generate_graph(){
 function movingAvg(array, count) {
 
     // calculate average for subarray
-    console.log("array",array)
+    // console.log("array",array)
     var avg = function (array) {
 
         var sum = 0, count = 0, val;
@@ -1359,8 +1466,8 @@ function movingAvg(array, count) {
         else
             result.push(val);
     }
-    console.log("result")
-    console.log(result)
+    // console.log("result")
+    // console.log(result)
     return result;
 }
 
