@@ -334,6 +334,7 @@ function displayGraph(){
         }
     });
 
+
     // Calculate statistics for displayed graph
     $.ajax({
         type: "POST",
@@ -373,6 +374,67 @@ function displayGraph(){
         }
     });
 
+    mov_avg_dataset = Array.from(dataset);
+
+    for (var i = 0; i < sensors_data.length; i++) {
+        console.log(sensors_data[i]);
+        console.log(sensors_data[i]['label']);
+
+        var data = [];
+
+        var values  = [];
+        // For every date-value pair for that sensor
+        for (var j = 0; j < sensors_data[i]['data'].length; j++) {
+            values.push(sensors_data[i]['data'][j]['y']);          
+        };
+        
+        result = movingAvg(values,2);
+        
+        for (var j = 0; j < sensors_data[i]['data'].length; j++) {
+            var val = {
+                x: sensors_data[i]['data'][j]['x'],
+                y: result[j]
+            };
+           
+            data.push(val);
+        };
+        var obj = {
+            label: "Moving Avg - "+sensors_data[i]['label'],
+            borderColor: getRandomColor(),
+            fill: false,
+            tension: 0,
+            data: data
+        };
+
+        mov_avg_dataset.push(obj);
+        
+
+    }
+    console.log(dataset);
+
+    var ctxx = document.getElementById('mov_avg_chart').getContext('2d');
+    console.log(ctx)
+    var chart = new Chart(ctxx, {
+        type: 'line',
+        data: { datasets: mov_avg_dataset },
+        options: {
+            scales: {
+                xAxes: [{
+                    type: localStorage.getItem('chart_type')//'linear'
+                }]
+            },
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                title: {
+                    display: true,
+                    text: 'Chart.js Line Chart'
+                }
+            }
+        }
+    });
 
 }
 
@@ -1263,6 +1325,43 @@ function option_4_generate_graph(){
         })
     }
 
+}
+
+function movingAvg(array, count) {
+
+    // calculate average for subarray
+    console.log("array",array)
+    var avg = function (array) {
+
+        var sum = 0, count = 0, val;
+        for (var i in array) {
+            val = parseInt(array[i]);
+            sum += val;
+            count++;
+
+        }
+        
+        return sum / count;
+    };
+
+    var result = [], val;
+
+    // pad beginning of result with null values
+    for (var i = 0; i < count - 1; i++)
+        result.push(null);
+
+    // calculate average for each subarray and add to result
+    for (var i = 0, len = array.length - count; i <= len; i++) {
+
+        val = avg(array.slice(i, i + count));
+        if (isNaN(val))
+            result.push(null);
+        else
+            result.push(val);
+    }
+    console.log("result")
+    console.log(result)
+    return result;
 }
 
 function get_ADFT(){

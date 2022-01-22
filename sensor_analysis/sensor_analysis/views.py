@@ -905,6 +905,28 @@ def getStatistics(request):
 
         return JsonResponse(list(result) , safe=False)
 
+
+@csrf_exempt
+def movingAvg(array, count):
+
+    # calculate average for subarray  
+    def avg(array):
+        sum = 0
+        for i in array:
+            sum += i
+        return int(sum/len(array))
+
+    #calculate average for each subarray
+    result = []
+    i = 0
+    while(i<len(array)):
+        val = avg(array[i:i+count])
+        i+=count
+        result.append(val)
+
+    return result
+   
+
 @csrf_exempt
 def getADFT(request):
 
