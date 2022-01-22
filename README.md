@@ -34,3 +34,8 @@
         }
     }
     ```
+    
+    ***
+    ## Dependencies
+    - pip install statsmodels
+    - pip install cryptography
