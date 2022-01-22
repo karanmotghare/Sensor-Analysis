@@ -16,10 +16,26 @@
           $("#option_1").click(function(){
             $("#option2").hide();
             $("#option1").show();
+            $("#option3").hide();
+            $("#option4").hide();
           });
           $("#option_2").click(function(){
             $("#option2").show();
             $("#option1").hide();
+            $("#option3").hide();
+            $("#option4").hide();
+          });
+          $("#option_3").click(function(){
+            $("#option2").hide();
+            $("#option1").hide();
+            $("#option3").show();
+            $("#option4").hide();
+          });
+          $("#option_4").click(function(){
+            $("#option2").hide();
+            $("#option1").hide();
+            $("#option3").hide();
+            $("#option4").show();
           });
         });
     </script>
@@ -72,7 +88,8 @@
                         <option value="" selected disabled>Select Generation Type</option>
                         <option id="type_1" value="type_1">Points (y1, y2, ...) for time interval (t1, t2)</option>
                         <option id="type_2" value="type_2">Points ((t1, y1), (t2, y2), ...)</option>
-                        
+                        <option id="type_3" value="type_3">Data Entry</option>
+                        <option id="type_4" value="type_4">Fourier Transform</option>
                     </select>
                 </div>
                 <!-- <form name="dataGenOptions">
@@ -193,6 +210,173 @@
 
 
     </div>
+
+    <div class="row option3" id="option3">
+
+        <!-- <h3>Option 3</h3> -->
+        <div class="col">
+            <h2>Time Interval</h2>
+            <div class="col_log">
+
+                <div class="row" style="margin-left: auto; margin-right: auto;">
+                    <div class='row'>
+                        <div class="form-group">
+                            <div class='input-group date' id='datetimepicker9'>
+                                <input id="from_time_3" type='text' class="form-control" />
+                                <span class="input-group-addon">
+                                    <span class="glyphicon glyphicon-calendar"></span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class='row'>
+                        <div class="form-group">
+                            <div class='input-group date' id='datetimepicker10'>
+                                <input id="to_time_3" type='text' class="form-control" />
+                                <span class="input-group-addon">
+                                    <span class="glyphicon glyphicon-calendar"></span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col">
+            <h2>Rows</h2>
+            <input class="form-control" type="number" name="data_3" id="data_3" placeholder="Enter Value"><br/>
+            <button onclick="option_3_refresh_table();" id="btn">Refresh</button>
+        </div>
+
+        <div class="col">
+            <h2>Values</h2>
+            <table class="table table-striped" id='option_3_cols'>
+                <tr>
+                    <th>No.</th>
+                    <th>Time</th>
+                    <th>Value</th>
+                </tr>
+            </table>
+            <table class="table table-striped" id='option_3_table'>
+                
+            </table>
+            <div class="row">
+                <button onclick="option_3_increase_row();" id="btn">Row++</button>
+                <button onclick="option_3_decrease_row();" id="btn_red">Row--</button>
+            </div>
+        </div>
+
+        <!-- <div class="col">
+            <select name="selection_3" id="selection_3" class="selection" multiple="multiple">
+
+            </select><br/>
+            <button onclick="option_3_insert_db();" id="btn" data-toggle="modal" data-target="#statusModal">Save</button>
+            <div class="selection_status" id="err_msg_3">
+            </div>
+        </div> -->
+
+        
+        <div class="col">
+            <!-- <button onclick="option_3_remove_from_list();" id="btn_red">Remove</button> -->
+            <button onclick="option_3_insert_db();" id="btn" data-toggle="modal" data-target="#statusModal">Save</button>
+            <button onclick="option_3_generate_graph();" id="btn">Generate Graph</button>
+        </div>
+
+
+    </div>
+
+    <div class="row option4" id="option4">
+
+        <!-- <div class="col">
+            <h2>Time Interval</h2>
+            <div class="col_log">
+
+                <div class="row" style="margin-left: auto; margin-right: auto;">
+                    <div class='row'>
+                        <div class="form-group">
+                            <div class='input-group date' id='datetimepicker11'>
+                                <input id="from_time_4" type='text' class="form-control" />
+                                <span class="input-group-addon">
+                                    <span class="glyphicon glyphicon-calendar"></span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class='row'>
+                        <div class="form-group">
+                            <div class='input-group date' id='datetimepicker12'>
+                                <input id="to_time_4" type='text' class="form-control" />
+                                <span class="input-group-addon">
+                                    <span class="glyphicon glyphicon-calendar"></span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div> -->
+
+        <div class="col">
+            <h2>Time Units</h2>
+            <input class="form-control" type="number" name="data_4" id="data_4" placeholder="Enter Value"><br/>
+            <button onclick="option_4_refresh_table();" id="btn">Refresh</button>
+        </div>
+
+        <div class="col">
+            <h2>Coefficients</h2>
+            <table class="table table-striped" id='option_4_cols'>
+                <tr>
+                    <th>No.</th>
+                    <th>Coefficient A(i)</th>
+                    <!-- <th>Value</th> -->
+                </tr>
+            </table>
+            <table class="table table-striped" id='option_4_table'>
+                
+            </table>
+            <div class="row">
+                <button onclick="option_4_increase_row();" id="btn">Row++</button>
+                <button onclick="option_4_decrease_row();" id="btn_red">Row--</button>
+            </div>
+        </div>
+
+        <div class="col">
+            <h2>Values   <button onclick="option_4_update_values();"><i class="fa fa-refresh" aria-hidden="true"></i></button></h2>
+            <table class="table table-striped" id='option_4_cols'>
+                <tr>
+                    <th>No.</th>
+                    <th>Value</th>
+                    <!-- <th>Value</th> -->
+                </tr>
+            </table>
+            <table class="table table-striped" id='option_4_table_vals'>
+                
+            </table>
+        
+        </div>
+
+        <!-- <div class="col">
+            <select name="selection_3" id="selection_3" class="selection" multiple="multiple">
+
+            </select><br/>
+            <button onclick="option_3_insert_db();" id="btn" data-toggle="modal" data-target="#statusModal">Save</button>
+            <div class="selection_status" id="err_msg_3">
+            </div>
+        </div> -->
+
+        
+        <div class="col">
+            <!-- <button onclick="option_3_remove_from_list();" id="btn_red">Remove</button> -->
+            <button disabled onclick="option_4_insert_db();" id="btn" data-toggle="modal" data-target="#statusModal">Save</button>
+            <button onclick="option_4_generate_graph();" id="btn">Generate Graph</button>
+        </div>
+
+
+    </div>
+
 
     <!-- Modal -->
     <div class="modal fade" id="statusModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">

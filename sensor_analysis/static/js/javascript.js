@@ -179,8 +179,19 @@ $(function () {
     $("#datetimepicker7").on("dp.change", function (e) {
         $('#datetimepicker6').data("DateTimePicker").maxDate(e.date);
     });
-    $('#datetimepicker8').datetimepicker();
 
+    $('#datetimepicker8').datetimepicker();
+    
+    $('#datetimepicker9').datetimepicker();
+    $('#datetimepicker10').datetimepicker({
+        useCurrent: false
+    });
+    $("#datetimepicker9").on("dp.change", function (e) {
+        $('#datetimepicker10').data("DateTimePicker").minDate(e.date);
+    });
+    $("#datetimepicker10").on("dp.change", function (e) {
+        $('#datetimepicker9').data("DateTimePicker").maxDate(e.date);
+    });
 });
 
 // Generate graph
@@ -240,7 +251,7 @@ function generate_graph(){
                 var newWindow = window.open('chartJS');
                 
                 localStorage.setItem('sensors_data', JSON.stringify(sensors_data));
-    
+                localStorage.setItem('chart_type', 'time');
             }
 
         })
@@ -307,7 +318,7 @@ function displayGraph(){
         options: {
             scales: {
             xAxes: [{
-                type: 'time'
+                type: localStorage.getItem('chart_type')//'linear'
             }]
             },
             responsive: true,
@@ -334,31 +345,26 @@ function displayGraph(){
 
         success: function(table){
             console.log("Statistics calculated");
-            // console.log(typeof table)
-            // table = JSON.parse(table_data);
-            titles = Object.keys(table[0])
-            // console.log(Object.keys(table[0]));
 
             // Create table in html
             let html_data = '';
 
-            // let i = 0;
+            // console.log(table)
 
-            for(row in table[0]){
+            for(var i=0; i<table.length; i++){
                 html_data += '<tr>'
-                console.log(row);
-                html_data += `<th>${row}</th>`
-                // console.log(table[0][row]);
-                for (col in table[0][row]){
-                    console.log(table[0][row][col]);
-                    html_data += `<td>${table[0][row][col]}</td>`
-                }
-                html_data += '</tr>'
-            }
 
-            // sg.forEach(function (sg) {
-                // html_data += `<option id="sgrp_id" value="${sg.sg_id}">${sg.sg_name}</option>`
-            // });
+                for(var j=0; j<table[i].length; j++){
+                    if(i==0 || j==0){
+                        html_data += `<th>${table[i][j]}</th>`;
+                    }
+                    else{
+                        html_data += `<td>${table[i][j]}</td>`;
+                    }
+                }
+
+                html_data += '</tr>';
+            }
 
             var sengrp = document.getElementById('stats');
             // console.log(sengrp.innerHTML)
@@ -368,7 +374,6 @@ function displayGraph(){
     });
 
 
-    // console.log(JSON.parse(sensors_data));
 }
 
 // DATA GENERATION FUNCTIONS
@@ -383,16 +388,46 @@ function change_gen_type(){
     if(type=='type_1'){
         var option_1 = document.getElementById('option1');
         var option_2 = document.getElementById('option2');
+        var option_3 = document.getElementById('option3');
+        var option_4 = document.getElementById('option4');
 
         option_1.style.display = 'block';
         option_2.style.display = 'none';
+        option_3.style.display = 'none';
+        option_4.style.display = 'none';
     }
     else if(type=='type_2'){
         var option_1 = document.getElementById('option1');
         var option_2 = document.getElementById('option2');
+        var option_3 = document.getElementById('option3');
+        var option_4 = document.getElementById('option4');
 
         option_1.style.display = 'none';
         option_2.style.display = 'block';
+        option_3.style.display = 'none';
+        option_4.style.display = 'none';
+    }
+    else if(type=='type_3'){
+        var option_1 = document.getElementById('option1');
+        var option_2 = document.getElementById('option2');
+        var option_3 = document.getElementById('option3');
+        var option_4 = document.getElementById('option4');
+
+        option_1.style.display = 'none';
+        option_2.style.display = 'none';
+        option_3.style.display = 'block';
+        option_4.style.display = 'none';
+    }
+    else if(type=='type_4'){
+        var option_1 = document.getElementById('option1');
+        var option_2 = document.getElementById('option2');
+        var option_3 = document.getElementById('option3');
+        var option_4 = document.getElementById('option4');
+
+        option_1.style.display = 'none';
+        option_2.style.display = 'none';
+        option_3.style.display = 'none';
+        option_4.style.display = 'block';
     }
 }
 
@@ -520,7 +555,7 @@ function option_1_generate_graph(){
                 var newWindow = window.open('chartJS');
                 
                 localStorage.setItem('sensors_data', JSON.stringify(sensors_data));
-                
+                localStorage.setItem('chart_type', 'time');
             }
 
         })
@@ -727,7 +762,7 @@ function option_2_generate_graph(){
                 var newWindow = window.open('chartJS');
                 
                 localStorage.setItem('sensors_data', JSON.stringify(sensors_data));
-                
+                localStorage.setItem('chart_type', 'time');
             }
 
         })
@@ -783,6 +818,451 @@ function option_2_insert_db(){
         })
         
     }
+}
+
+function option_3_refresh_table(){
+    
+    // Get number of rows to be created
+    var data_point = document.getElementById('data_3')
+    var num_rows = document.getElementById('data_3').value;
+
+    // Get the time interval
+    var from_time = document.getElementById('from_time_3').value;
+    var to_time = document.getElementById('to_time_3').value;
+
+    if(!from_time || !to_time || num_rows<=1){
+        console.log("Invalid Selection !");
+        status_box = document.getElementById('status_box');
+        // selected_data = status_box.innerHTML;
+        selected_data = `Enter all Parameters`;
+        status_box.innerHTML = selected_data;
+    }
+    else{
+        // String to js Date
+        console.log("From time ",from_time);
+        from = new Date(from_time);
+        to = new Date(to_time);
+
+        interval = (to-from)/(num_rows-1);
+
+        console.log(interval);
+
+
+        // Populate the table display data
+        html_data = '';
+        curr = from;
+
+        for(var i=0; i<num_rows; i++){
+            html_data += '<tr>';
+
+            html_data += `<td>${i+1}</td>`
+
+            html_data += `<td><input type='text' value=${moment(curr).format('YYYY-MM-DD/HH:mm:ss')}></td>`;
+
+            html_data += `<td><input type='number' value=${i}></td>`;
+
+            html_data += '</tr>';
+
+            // Increment time
+            // console.log(curr);
+            curr = new Date(new Date(curr).getTime() + interval);
+            // console.log(moment(curr).format('YYYY-MM-DD HH:mm:ss'));
+
+        }
+
+
+
+        var table = document.getElementById('option_3_table');
+        table.innerHTML = html_data;
+    }
+}
+
+function option_3_generate_graph(){
+
+    // Get sensor details
+    var sensor = document.getElementById('sns_list');
+    var sensor_id = sensor.value;
+    var sensor_name = sensor.options[sensor.selectedIndex].text;
+
+    var table = document.getElementById('option_3_table');
+    // console.log(table.rows[0].cells[1].getElementsByTagName("input")[0].value)
+    rows = table.rows.length;
+
+    if(!sensor_id || rows<=1){
+        console.log("Invalid Selection !");
+        status_box = document.getElementById('status_box');
+        // selected_data = status_box.innerHTML;
+        selected_data = `Enter all Parameters`;
+        status_box.innerHTML = selected_data;
+    }
+    else{
+
+        values = new Array(rows);
+        timestamp = new Array(rows);
+
+        for(var i=0; i<rows; i++){
+            
+            date_time = table.rows[i].cells[1].getElementsByTagName("input")[0].value;
+            // console.log(date_time);
+
+            value = table.rows[i].cells[2].getElementsByTagName("input")[0].value;
+            // console.log(value);
+
+            values[i] = value;
+            timestamp[i] = date_time.replace(/\//g, " ");
+        }
+
+        console.log(timestamp);
+        console.log(values);
+
+        value_list = {"data" : values};
+        time_list = {"data" : timestamp}; 
+
+        // console.log(JSON.stringify(data_list));
+
+        $.ajax({
+            type: "POST",
+            url: 'option_3_graph',
+            data: {
+                'values' : JSON.stringify(value_list),
+                'timestamp' : JSON.stringify(time_list),
+                'name' : sensor_name,
+                'csrfmiddlewaretoken': '{{ csrf_token }}',
+            },
+
+            success: function(sensors_data){
+                console.log(sensors_data);
+                var newWindow = window.open('chartJS');
+                
+                localStorage.setItem('sensors_data', JSON.stringify(sensors_data));
+                localStorage.setItem('chart_type', 'time');
+            }
+
+        })
+    }
+
+    
+}
+
+function option_3_increase_row(){
+
+    var table = document.getElementById('option_3_table');
+    var table_data = table.innerHTML;
+    var i = table.rows.length;
+
+    table_data += `<tr><td>${i+1}</td><td><input type='text'></td><td><input type='number' value=${i}></td></tr>`;
+
+    table.innerHTML = table_data;
+}
+
+function option_3_decrease_row(){
+    var table = document.getElementById('option_3_table');
+    var table_data = table.innerHTML;
+    var i = table.rows.length;
+
+    if(i>0){
+        document.getElementById('option_3_table').deleteRow(i-1);
+    }
+    
+}
+
+function option_3_insert_db(){
+    // Get sensor details
+    var sensor = document.getElementById('sns_list');
+    var sensor_id = sensor.value;
+    var sensor_name = sensor.options[sensor.selectedIndex].text;
+
+    var table = document.getElementById('option_3_table');
+    // console.log(table.rows[0].cells[1].getElementsByTagName("input")[0].value)
+    rows = table.rows.length;
+
+    if(!sensor_id || rows<=1){
+        console.log("Invalid Selection !");
+        status_box = document.getElementById('status_box');
+        // selected_data = status_box.innerHTML;
+        selected_data = `Enter all Parameters`;
+        status_box.innerHTML = selected_data;
+    }
+    else{
+
+        values = new Array(rows);
+        timestamp = new Array(rows);
+
+        for(var i=0; i<rows; i++){
+            
+            date_time = table.rows[i].cells[1].getElementsByTagName("input")[0].value;
+            // console.log(date_time);
+
+            value = table.rows[i].cells[2].getElementsByTagName("input")[0].value;
+            // console.log(value);
+
+            values[i] = value;
+            timestamp[i] = date_time.replace(/\//g, " ");
+        }
+
+        console.log(timestamp);
+        console.log(values);
+
+        value_list = {"data" : values};
+        time_list = {"data" : timestamp}; 
+
+        // console.log(JSON.stringify(data_list));
+
+        $.ajax({
+            type: "POST",
+            url: 'option_3_insert_db',
+            data: {
+                'values' : JSON.stringify(value_list),
+                'timestamp' : JSON.stringify(time_list),
+                'name' : sensor_name,
+                'id' : sensor_id,
+                'csrfmiddlewaretoken': '{{ csrf_token }}',
+            },
+
+            success: function(version){
+
+                console.log("Saved as : ", version);
+
+                status_box = document.getElementById('status_box');
+                // selected_data = status_box.innerHTML;
+                selected_data = `Data saved as Version Number : <b>${version}</b>`;
+                status_box.innerHTML = selected_data;
+                
+            }
+
+        })
+    }
+}
+
+function option_4_refresh_table(){
+    
+    // Get number of rows to be created
+    var data_point = document.getElementById('data_4')
+    var num_rows = document.getElementById('data_4').value;
+
+    // // Get the time interval
+    // var from_time = document.getElementById('from_time_3').value;
+    // var to_time = document.getElementById('to_time_3').value;
+
+    if(num_rows<=1){
+        console.log("Invalid Selection !");
+        status_box = document.getElementById('status_box');
+        // selected_data = status_box.innerHTML;
+        selected_data = `Enter all Parameters`;
+        status_box.innerHTML = selected_data;
+    }
+    else{
+        // String to js Date
+        // console.log("From time ",from_time);
+        // from = new Date(from_time);
+        // to = new Date(to_time);
+
+        // interval = (to-from)/(num_rows-1);
+
+        // console.log(interval);
+
+
+        // Populate the table display data
+        html_data = '';
+        // curr = from;
+
+        for(var i=0; i<num_rows; i++){
+            html_data += '<tr>';
+
+            html_data += `<td>${i+1}</td>`
+
+            // html_data += `<td><input type='text' value=${moment(curr).format('YYYY-MM-DD/HH:mm:ss')}></td>`;
+
+            html_data += `<td><input type='number' value=${i}></td>`;
+
+            html_data += '</tr>';
+
+            // Increment time
+            // console.log(curr);
+            // curr = new Date(new Date(curr).getTime() + interval);
+            // console.log(moment(curr).format('YYYY-MM-DD HH:mm:ss'));
+
+        }
+
+
+
+        var table = document.getElementById('option_4_table');
+        table.innerHTML = html_data;
+    }
+}
+
+function option_4_increase_row(){
+
+    var table = document.getElementById('option_4_table');
+    var table_data = table.innerHTML;
+    var i = table.rows.length;
+
+    table_data += `<tr><td>${i+1}</td><td><input type='number' value=${i}></td></tr>`;
+
+    table.innerHTML = table_data;
+}
+
+function option_4_decrease_row(){
+    var table = document.getElementById('option_4_table');
+    var table_data = table.innerHTML;
+    var i = table.rows.length;
+
+    if(i>0){
+        document.getElementById('option_4_table').deleteRow(i-1);
+    }
+    
+}
+
+function fourier_series(coeffs, num){
+
+    omega = 10;
+    console.log(coeffs, num);
+
+    console.log(Math.sin(omega*30));
+    // Initialise values list
+    vals = new Array(num);
+
+    // Loop for every time unit
+    for(var i=0; i<num; i++){
+
+        new_val = coeffs[0];
+
+        for(var j=1; j<num; j++){
+            new_val += (coeffs[j]*Math.sin(j*omega*i));
+        }
+
+        vals[i] = new_val;
+    }
+
+    console.log(vals);
+
+    return vals;
+
+}
+
+function option_4_update_values(){
+    var table = document.getElementById('option_4_table');
+    // console.log(table.rows[0].cells[1].getElementsByTagName("input")[0].value)
+    rows = table.rows.length;
+
+    if(rows<=1){
+        console.log("Invalid Selection !");
+        status_box = document.getElementById('status_box');
+        // selected_data = status_box.innerHTML;
+        selected_data = `Enter all Parameters`;
+        status_box.innerHTML = selected_data;
+    }
+    else{
+
+        coeffs = new Array(rows);
+        nums = new Array(rows);
+
+        for(var i=0; i<rows; i++){
+            
+            num = table.rows[i].cells[0].innerHTML;
+            // console.log(date_time);
+
+            coeff = table.rows[i].cells[1].getElementsByTagName("input")[0].value;
+            // console.log(value);
+
+            coeffs[i] = parseInt(coeff);
+            nums[i] = num;
+        }
+
+        console.log(coeffs);
+        console.log(nums);
+
+        values = fourier_series(coeffs, rows);
+
+        // Populate the table display data
+        html_data = '';
+        // curr = from;
+
+        for(var i=0; i<rows; i++){
+            html_data += '<tr>';
+
+            html_data += `<td>${i+1}</td>`
+
+            html_data += `<td>${values[i].toFixed(4)}</td>`;
+
+            html_data += '</tr>';
+
+        }
+
+
+
+        var table = document.getElementById('option_4_table_vals');
+        table.innerHTML = html_data;
+
+
+    }
+}
+
+function option_4_generate_graph(){
+    // Get sensor details
+    var sensor = document.getElementById('sns_list');
+    var sensor_id = sensor.value;
+    var sensor_name = sensor.options[sensor.selectedIndex].text;
+
+    var table = document.getElementById('option_4_table');
+    // console.log(table.rows[0].cells[1].getElementsByTagName("input")[0].value)
+    rows = table.rows.length;
+
+    if(!sensor_id || rows<=1){
+        console.log("Invalid Selection !");
+        status_box = document.getElementById('status_box');
+        // selected_data = status_box.innerHTML;
+        selected_data = `Enter all Parameters`;
+        status_box.innerHTML = selected_data;
+    }
+    else{
+
+        coeffs = new Array(rows);
+        nums = new Array(rows);
+
+        for(var i=0; i<rows; i++){
+            
+            num = table.rows[i].cells[0].innerHTML;
+            // console.log(date_time);
+
+            coeff = table.rows[i].cells[1].getElementsByTagName("input")[0].value;
+            // console.log(value);
+
+            coeffs[i] = parseInt(coeff);
+            nums[i] = parseInt(num);
+        }
+
+        console.log(coeffs);
+        console.log(nums);
+
+        values = fourier_series(coeffs, rows);
+
+        value_list = {"data" : values};
+        time_list = {"data" : nums}; 
+
+        // console.log(JSON.stringify(data_list));
+
+        $.ajax({
+            type: "POST",
+            url: 'option_4_graph',
+            data: {
+                'values' : JSON.stringify(value_list),
+                'timestamp' : JSON.stringify(time_list),
+                'name' : sensor_name,
+                'csrfmiddlewaretoken': '{{ csrf_token }}',
+            },
+
+            success: function(sensors_data){
+                console.log(sensors_data);
+                var newWindow = window.open('chartJS');
+                
+                localStorage.setItem('sensors_data', JSON.stringify(sensors_data));
+                localStorage.setItem('chart_type', 'linear');
+            }
+
+        })
+    }
+
 }
 
 function get_ADFT(){
