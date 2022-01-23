@@ -335,3 +335,12 @@ input{
 #option4 {
     display: none;
 }
+
+td{
+    text-align: center;
+}
+
+.table>tbody>tr>th{
+    text-align: center;
+}
+
