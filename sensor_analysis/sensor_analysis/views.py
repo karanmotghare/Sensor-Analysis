@@ -11,6 +11,7 @@ import random
 from datetime import datetime, timedelta
 import numpy
 from scipy import stats
+from scipy.stats import pearsonr
 from statsmodels.tsa.stattools import adfuller
 
 #from models import SuperAdmins
@@ -926,6 +927,109 @@ def movingAvg(array, count):
 
     return result
    
+def split_array(arr, window):
+    split_arr = []
+
+    i = 0
+    while((i+window)<=len(arr)):
+        split_arr.append(arr[i:i+window])
+        i = i + window
+
+    return split_arr
+
+@csrf_exempt
+def getMotifs(request):
+    if request.method == "POST":
+        sensors_data = json.loads(request.POST['sensors_data']) 
+        percent = int(json.loads(request.POST['percent']))
+        # percent = int(request.POST["percent"])
+
+        print("Percent : ", percent)
+
+        # Initialise the return list
+        data_list = []
+
+        for sensor in sensors_data:
+            
+            label = sensor['label']
+            
+            data_points = [ int(data['y']) for data in sensor['data'] ]
+
+            time_points = [ int(data['x']) for data in sensor['data'] ]
+
+            window = int(len(data_points)*percent//100)
+
+            threshold = 3
+
+            split_points = split_array(data_points, window)
+
+            split_time = split_array(time_points, window)
+
+            flag = [0] * len(split_points)
+
+            similar_objs = []
+            time_intervals = []
+            
+            count = 0
+
+            for i in range(0, len(split_points)):
+
+                if not flag[i]:
+
+                    new_list = [i]
+                    new_interval = [(split_time[i][0], split_time[i][window-1])]
+
+                    for j in range(i+1, len(split_points)):
+
+                        if not flag[j]:
+                            # Pearson's Correlation
+                            corr, _ = pearsonr(split_points[i], split_points[j])
+
+                            if corr > 0.7:
+
+                                new_list.append(j)
+                                new_interval.append((split_time[j][0], split_time[j][window-1]))
+                                # no. of repetitions w.r.t i, points of window i 
+                                # similar_objs[i] = j
+
+                                flag[j] = 1
+
+                    if len(new_list)>=3:
+                        similar_objs.append(new_list)
+                        time_intervals.append(new_interval)
+
+                    flag[i] = 1
+
+
+            for i in range(len(similar_objs)):
+
+                window_data = split_points[similar_objs[i][0]]
+
+                # Create data points with corresponding time
+                lst = []
+
+                for j in range(1, len(window_data)+1):
+                    time = j #datetime.strptime(timestamps[i], '%Y-%m-%d %H:%M:%S')
+                    value = {
+                        'x' : str(time),
+                        'y' : str(window_data[j-1])
+                    }
+
+                    lst.append(value)
+
+                obj = {
+                    'label' : label + '_' + str(i+1),
+                    'data' : lst,
+                    'repititions' : len(similar_objs[i]),
+                    'intervals' : time_intervals[i]
+                }
+
+                data_list.append(obj)
+
+            
+        return JsonResponse(list(data_list) , safe=False)
+
+
 
 @csrf_exempt
 def getADFT(request):

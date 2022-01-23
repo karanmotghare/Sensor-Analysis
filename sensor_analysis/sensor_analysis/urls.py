@@ -41,6 +41,7 @@ urlpatterns = [
     path('option_2_insert_db', views.option_2_insert_db, name='option_2_insert_db'),
     path('option_3_insert_db', views.option_3_insert_db, name='option_3_insert_db'),
     path('getStatistics', views.getStatistics, name='getStatistics'),
+    path('getMotifs', views.getMotifs, name='getMotifs'),
     path('getADFT', views.getADFT, name='getADFT'),
     # path('getDataGen', views.data_Gen, name='getDataGen'),
 
