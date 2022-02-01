@@ -26,7 +26,7 @@ function drop() {
 
 // Functions to facilitate graph attributes selection on homepage
 
-function change_location() {
+function change_location(page = "home") {
     console.log("Location value changed");
 
     // Get id of selected location
@@ -49,13 +49,13 @@ function change_location() {
 
             var sengrp = document.getElementById('sngrp_list');
             sengrp.innerHTML = html_data;
-            change_sg();
+            change_sg(page);
         }
     });
 
 }
 
-function change_sg() {
+function change_sg(page = "home") {
     console.log("Sensor Group value changed");
 
     // Get id of selected location
@@ -78,9 +78,47 @@ function change_sg() {
 
             var sen = document.getElementById('sns_list');
             sen.innerHTML = html_data;
+
+            if(page!='home'){
+                change_sensor();
+            }
         }
     });
 }
+
+function change_sensor() {
+    console.log("Sensor value changed");
+
+    // Get id of selected location
+    var x = document.getElementById('sns_list');
+    var id = x.value;
+
+    $.ajax({
+        type: "POST",
+        url: 'getVersionsAjax',
+        data: {
+            'sns_id': id,
+            'csrfmiddlewaretoken': '{{ csrf_token }}',
+        },
+
+        success: function (max_ver) {
+            let html_data = '<option value="" disabled selected>Select Version</option>';
+            
+            for(var i=0; i<max_ver; i++){
+                html_data += `<option id="ver_id" value="${i+1}">${i+1}</option>`;
+            }
+            
+            // sensor.forEach(function (sensor) {
+            //     html_data += `<option id="sns_id" value="${sensor.sensor_id}">${sensor.sensor_name}</option>`
+            // });
+
+            var sen = document.getElementById('ver_list');
+            sen.innerHTML = html_data;
+        }
+    });
+}
+
+
 
 // Function to add sensor to compare on homepage
 function already_exists(val) {
@@ -140,6 +178,52 @@ function add_to_compare() {
         selected.innerHTML = selected_data;
     }
 }
+
+function add_to_compare_2() {
+    var loc = document.getElementById('location_list');
+    var loc_id = loc.value;
+    var loc_name = loc.options[loc.selectedIndex].text;
+
+    var sg = document.getElementById('sngrp_list');
+    var sg_id = sg.value;
+    var sg_name = sg.options[sg.selectedIndex].text;
+
+    var sensor = document.getElementById('sns_list');
+    var sensor_id = sensor.value;
+    var sensor_name = sensor.options[sensor.selectedIndex].text;
+
+    var version = document.getElementById('ver_list');
+    var version_id = version.value;
+    var version_name = version.options[version.selectedIndex].text;
+
+    var val = new Array(loc_id, sg_id, sensor_id, version_id);
+
+    var present = already_exists(val);
+
+    console.log(val);
+
+    if (!loc_id || !sg_id || !sensor_id || !version_id) {
+        console.log("Invalid sensor selection");
+        var err = document.getElementById('err_msg');
+        err.innerHTML = '<p>Invalid Selection !</p>';
+    }
+    else if (present) {
+        console.log("Already present");
+        var err = document.getElementById('err_msg');
+        err.innerHTML = '<p>Selection Already Exists !</p>';
+    }
+    else {
+        console.log("Valid Selection");
+        var err = document.getElementById('err_msg');
+        err.innerHTML = '';
+
+        selected = document.getElementById('selection');
+        selected_data = selected.innerHTML;
+        selected_data += `<option value="${val}">${loc_name} / ${sg_name} / ${sensor_name} / ${version_name}</option>`;
+        selected.innerHTML = selected_data;
+    }
+}
+
 
 // Function to remove sensor from selected list
 function remove_from_list() {
@@ -249,6 +333,55 @@ function generate_graph() {
 
 
 }
+
+function generate_ver_graph() {
+
+
+    // var from_time = document.getElementById('from_time').value;
+    // var to_time = document.getElementById('to_time').value;
+    var list = document.getElementById('selection').options;
+    console.log(list);
+
+    if (!list.length) {
+        console.log("Invalid Selection !");
+    }
+    else {
+    
+        // Get data from db using ajax
+        
+        data = new Array(list.length);
+        for (var i = 0; i < list.length; i++) {
+            data[i] = list[i].value
+            //data[i] = (list[i].value).split(",").map(Number);
+        }
+
+        data_list = { "data": data }
+
+        console.log(JSON.stringify(data_list));
+
+        $.ajax({
+            type: "POST",
+            url: 'getVersionData',
+            data: {
+                'sensors': JSON.stringify(data_list),
+                'csrfmiddlewaretoken': '{{ csrf_token }}',
+            },
+
+            success: function (sensors_data) {
+                console.log(sensors_data);
+                var newWindow = window.open('chartJS');
+
+                localStorage.setItem('sensors_data', JSON.stringify(sensors_data));
+                localStorage.setItem('chart_type', 'time');
+            }
+
+        })
+
+    }
+
+
+}
+
 
 // Generate random colour
 function getRandomColor() {
