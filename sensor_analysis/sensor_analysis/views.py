@@ -324,6 +324,33 @@ def getSensorAjax(request):
             return JsonResponse(request.data)
         return JsonResponse(list(sensors.values('sensor_id', 'sensor_name')), safe = False) 
 
+# Function to load sensors
+@csrf_exempt
+def getVersionsAjax(request):
+
+    if request.method == "POST":
+        sns_id = request.POST['sns_id']
+        latest_v = 0
+
+        try:
+            if sns_id:
+                sensor = Sensor.objects.filter(sg_id = sns_id).first()
+                # Get the latest saved version in the database
+                versions = SensorGenData.objects.filter(sensor = sensor)
+
+                ver = versions.aggregate(Max('version_id'))
+    
+                if ver['version_id__max']:
+                    latest_v = ver['version_id__max']
+                
+            else:
+                sensors = Sensor.objects.none()
+        except Exception:
+            request.data['error_message'] = 'error'
+            return JsonResponse(request.data)
+        return JsonResponse(latest_v, safe = False) 
+
+
 # Function to get sensor data
 @csrf_exempt
 def getDataValues(request):
@@ -358,6 +385,55 @@ def getDataValues(request):
 
                     obj = {
                         'label' : sns[0].sensor_name,
+                        'data' : lst 
+                    }
+
+                    data_list.append(obj)
+
+        except Exception:
+            request.data['error_message'] = Exception
+            return JsonResponse(request.data)
+        
+        return JsonResponse(list(data_list) , safe=False)
+
+@csrf_exempt
+def getVersionData(request):
+
+    if request.method == "POST":
+        sensors_list = (json.loads(request.POST['sensors']))["data"]
+        
+        data_list = []
+        
+        try:
+            if sensors_list:
+                
+                # Get data for every sensor
+                for sensor in sensors_list:
+                    
+                    val = sensor.split(',')
+                    sns = Sensor.objects.filter(sensor_id = val[2])
+                    version = int(val[3])
+                    data = SensorGenData.objects.filter(sensor = sns[0], version_id = version)
+
+                    lst = []
+
+                    value = {
+                            'x' : (data[0].from_time).strftime('%Y-%m-%d %H:%M:%S'),
+                            'y' : data[0].from_data
+                        }
+                    
+                    lst.append(value)
+
+                    for point in data:
+                        value = {
+                            'x' : (point.to_time).strftime('%Y-%m-%d %H:%M:%S'),
+                            'y' : point.to_data
+                        }
+
+                        lst.append(value)
+
+                    obj = {
+                        'label' : sns[0].sensor_name + " " + str(version),
                         'data' : lst 
                     }
 
@@ -480,6 +556,27 @@ def saveGenData(data, sensor):
 
 
     return current
+
+# Function to redirect to saved data page
+def savedData(request):
+    if 'user' in request.session:
+        #print(request.session['user'])
+
+        user = Users.objects.filter(username=request.session['user']) 
+        org = user[0].org       
+
+        # Location list
+        locations = Location.objects.filter(org=org)
+
+        mapper={
+            'locations':locations,
+            'heading':'Data Retrieval Portal',
+            'display':'block'
+        }
+        return render(request,'savedData.html',mapper)
+    else:
+        return HttpResponseRedirect("/")
+
 
 # Function to create user generated graph for option 1
 @csrf_exempt

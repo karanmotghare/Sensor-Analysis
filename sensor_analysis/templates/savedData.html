@@ -10,7 +10,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{%static 'index.css' %}">
-    <title>Home</title>
+    <title>Load Data</title>
 </head>
 
 <body>
@@ -24,7 +24,7 @@
         <div class="col">
             <h2>Location</h2>
             <div class="col_log">
-                <select name="location" id="location_list" onchange="change_location();">
+                <select name="location" id="location_list" onchange="change_location('other');">
                     <option value="" selected disabled>Select Location</option>
                     {% for location in locations %}
                     <option id="loc_opt" value="{{location.loc_id}}">{{location.loc_name}}</option>
@@ -43,12 +43,12 @@
         <div class="col">
             <h2>Select Sensors</h2>
             <div class="col_log">
-                <select name="sensors" id="sns_list">
+                <select name="sensors" id="sns_list" onchange="change_sensor();">
                     <option value="" selected disabled>Select Sensor</option>
                 </select>
             </div>
         </div>
-        <div class="col">
+        <!-- <div class="col">
             <h2>Time</h2>
             <div class="col_log">
 
@@ -76,11 +76,22 @@
                 </div>
             </div>
 
-        </div>
+        </div> -->
+
+        <div class="col">
+            <h2>Versions</h2>  
+            <div class="col_log">
+                <select name="versions" id="ver_list">
+                    <option value="" selected disabled>Select Version</option>
+                </select>
+            </div>
+        </div>      
+
+
     </div>
     <div class="row">
         <div class="col">
-            <button onclick="add_to_compare();" id="btn">Add</button>
+            <button onclick="add_to_compare_2();" id="btn">Add</button>
             <div class="selection_status" id="err_msg">
             </div>
         </div>
@@ -93,14 +104,9 @@
             <button onclick="remove_from_list();" id="btn_red">Remove</button>
         </div>
         <div class="col">
-            <button onclick="generate_graph();" id="btn">Generate Graph</button>
+            <button onclick="generate_ver_graph();" id="btn">Generate Graph</button>
         </div>
 
-    </div>
-
-    <div class="row">
-        <a class="btn" href="{% url 'savedData' %}" id="btn">Load Saved Data</a>
-        <a class="btn" href="{% url 'dataGen' %}" id="btn">Generate User Data</a>
     </div>
     
     <!-- <div class="row" id="analysis_div" style="padding: 6%;">
