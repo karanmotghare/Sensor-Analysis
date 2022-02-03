@@ -202,6 +202,8 @@ class Users(models.Model):
     position = models.CharField(max_length=9)
     org = models.ForeignKey(Organisation, models.DO_NOTHING, blank=True, null=True)
     created_by = models.CharField(max_length=255)
+    loc = models.ForeignKey(Location, models.DO_NOTHING, blank=True, null=True)
+
 
     class Meta:
         managed = False
