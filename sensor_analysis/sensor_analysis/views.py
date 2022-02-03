@@ -98,10 +98,17 @@ def homepage(request):
         #print(request.session['user'])
 
         user = Users.objects.filter(username=request.session['user']) 
-        org = user[0].org       
+        org = user[0].org  
+        user_loc = (user[0].loc)     
 
         # Location list
-        locations = Location.objects.filter(org=org)
+        if user[0].position=="org_admin":
+            locations = Location.objects.filter(org=org)
+
+        else:
+            locations = Location.objects.filter(loc_id=user_loc.loc_id)
+
+        print("Location id of user is :" , user_loc.loc_name)
 
         # Sensor Group List
         
@@ -515,10 +522,17 @@ def dataGen(request):
         #print(request.session['user'])
 
         user = Users.objects.filter(username=request.session['user']) 
-        org = user[0].org       
+        org = user[0].org     
+        user_loc = (user[0].loc)     
 
         # Location list
-        locations = Location.objects.filter(org=org)
+        if user[0].position=="org_admin":
+            locations = Location.objects.filter(org=org)
+
+        else:
+            locations = Location.objects.filter(loc_id=user_loc.loc_id)
+
+        print("Location id of user is :" , user_loc.loc_name)
 
         mapper={
             'locations':locations,
@@ -563,10 +577,17 @@ def savedData(request):
         #print(request.session['user'])
 
         user = Users.objects.filter(username=request.session['user']) 
-        org = user[0].org       
+        org = user[0].org 
+        user_loc = (user[0].loc)     
 
         # Location list
-        locations = Location.objects.filter(org=org)
+        if user[0].position=="org_admin":
+            locations = Location.objects.filter(org=org)
+
+        else:
+            locations = Location.objects.filter(loc_id=user_loc.loc_id)
+
+        print("Location id of user is :" , user_loc.loc_name)
 
         mapper={
             'locations':locations,
@@ -948,7 +969,7 @@ def getStatistics(request):
             # print(len(sensor['data']))
 
             # Calculate unique values
-            data_points = [ int(data['y']) for data in sensor['data'] ]
+            data_points = [ int(float(data['y'])) for data in sensor['data'] ]
             # print(data_points)
             data_list[0]['unique'].append(num_unique(data_points))
 
@@ -1038,7 +1059,9 @@ def split_array(arr, window):
 def getMotifs(request):
     if request.method == "POST":
         sensors_data = json.loads(request.POST['sensors_data']) 
-        percent = int(json.loads(request.POST['percent']))
+        percent = int(json.loads(request.POST['window']))
+        cutoff = float(json.loads(request.POST['cutoff']))
+        occur = int(json.loads(request.POST['occur']))
         # percent = int(request.POST["percent"])
 
         print("Percent : ", percent)
@@ -1050,13 +1073,13 @@ def getMotifs(request):
             
             label = sensor['label']
             
-            data_points = [ int(data['y']) for data in sensor['data'] ]
+            data_points = [ int(float(data['y'])) for data in sensor['data'] ]
 
-            time_points = [ int(data['x']) for data in sensor['data'] ]
+            time_points = [ (data['x']) for data in sensor['data'] ]
 
             window = int(len(data_points)*percent//100)
 
-            threshold = 3
+            # threshold = 3
 
             split_points = split_array(data_points, window)
 
@@ -1082,7 +1105,7 @@ def getMotifs(request):
                             # Pearson's Correlation
                             corr, _ = pearsonr(split_points[i], split_points[j])
 
-                            if corr > 0.7:
+                            if corr > cutoff:
 
                                 new_list.append(j)
                                 new_interval.append((split_time[j][0], split_time[j][window-1]))
@@ -1091,7 +1114,7 @@ def getMotifs(request):
 
                                 flag[j] = 1
 
-                    if len(new_list)>=3:
+                    if len(new_list)>=occur:
                         similar_objs.append(new_list)
                         time_intervals.append(new_interval)
 

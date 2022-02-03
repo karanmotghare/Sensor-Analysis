@@ -289,7 +289,8 @@
 
     <div class="row option4" id="option4">
 
-        <!-- <div class="col">
+        <div class="col">
+        <div class="row">
             <h2>Time Interval</h2>
             <div class="col_log">
 
@@ -317,14 +318,14 @@
                 </div>
             </div>
 
-        </div> -->
+        </div>
 
-        <div class="col">
+        <div class="row">
             <h2>Time Units</h2>
             <input class="form-control" type="number" name="data_4" id="data_4" placeholder="Enter Value"><br/>
             <button onclick="option_4_refresh_table();" id="btn">Refresh</button>
         </div>
-
+        </div>
         <div class="col">
             <h2>Coefficients</h2>
             <table class="table table-striped" id='option_4_cols'>
@@ -348,6 +349,7 @@
             <table class="table table-striped" id='option_4_cols'>
                 <tr>
                     <th>No.</th>
+                    <th>Time</th>
                     <th>Value</th>
                     <!-- <th>Value</th> -->
                 </tr>
@@ -370,7 +372,7 @@
         
         <div class="col">
             <!-- <button onclick="option_3_remove_from_list();" id="btn_red">Remove</button> -->
-            <button disabled onclick="option_4_insert_db();" id="btn" data-toggle="modal" data-target="#statusModal">Save</button>
+            <button onclick="option_4_insert_db();" id="btn" data-toggle="modal" data-target="#statusModal">Save</button>
             <button onclick="option_4_generate_graph();" id="btn">Generate Graph</button>
         </div>
 
