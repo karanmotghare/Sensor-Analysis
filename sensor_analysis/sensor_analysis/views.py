@@ -108,7 +108,7 @@ def homepage(request):
         else:
             locations = Location.objects.filter(loc_id=user_loc.loc_id)
 
-        print("Location id of user is :" , user_loc.loc_name)
+        # print("Location id of user is :" , user_loc.loc_name)
 
         # Sensor Group List
         
@@ -1172,3 +1172,11 @@ def getADFT(request):
         return response
 
     return JsonResponse(adfuller(data) , safe=False)
+
+
+def add_edit(request):
+    mapper={
+    'heading':'Organization Hierarchy',
+
+    }
+    return render(request,"add_edit.html",mapper)
