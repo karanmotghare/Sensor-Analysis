@@ -106,14 +106,9 @@ def homepage(request):
             locations = Location.objects.filter(org=org)
 
         else:
-            locations = Location.objects.filter(loc_id=user_loc.loc_id)
-
-        
+            locations = Location.objects.filter(loc_id=user_loc.loc_id)        
 
         # Sensor Group List
-        
-
-
         mapper={
             'locations':locations,
             'heading':'Sensor Analysis',
@@ -286,6 +281,121 @@ def add_new_org(request):
     
     else:
         return HttpResponseRedirect('/')
+
+# Function to add new location
+@csrf_exempt
+def addNewLoc(request):
+
+    if 'user' in request.session:
+        #print(request.session['user'])
+
+        user = Users.objects.filter(username=request.session['user']) 
+        org = user[0].org     
+        # user_loc = (user[0].loc)   
+
+        # Get Location Name
+        location_name = request.POST["new_location"] 
+        message = ""
+
+        # Location list
+        if user[0].position=="org_admin":
+            try:
+                new_loc = Location(loc_name=location_name, org=org)
+                new_loc.save()
+                message = "Location Saved Successfully"
+
+            except Exception:
+                message = "Error Saving Location"
+                
+        else:
+            message = "Unauthorised User!"
+
+        print(message)
+
+        return JsonResponse(message, safe = False) 
+
+# Function to add new Sg
+@csrf_exempt
+def addNewSg(request):
+
+    if 'user' in request.session:
+        #print(request.session['user'])
+
+        user = Users.objects.filter(username=request.session['user']) 
+        org = user[0].org     
+        # user_loc = (user[0].loc)   
+
+        # Get Location id
+        location_id = int(request.POST["location"])
+        location = Location.objects.filter(loc_id=location_id)
+
+        # Get new Sensor Group
+        new_sg = request.POST["new_sg"]
+
+        message = ""
+
+        # Location list
+        if user[0].position=="org_admin":
+            try:
+                new_sg = SensorGroup(sg_name=new_sg, loc=location[0])
+                new_sg.save()
+                message = "Sensor Group Saved Successfully"
+
+            except Exception:
+                message = "Error Saving Sensor Group"
+                
+        else:
+            message = "Unauthorised User!"
+
+        print(message)
+
+        return JsonResponse(message, safe = False) 
+   
+
+# Function to add new Sensor
+@csrf_exempt
+def addNewSns(request):
+
+    if 'user' in request.session:
+        #print(request.session['user'])
+
+        user = Users.objects.filter(username=request.session['user']) 
+        org = user[0].org     
+        # user_loc = (user[0].loc)   
+
+        # Get Location id
+        location_id = int(request.POST["location"])
+        location = Location.objects.filter(loc_id=location_id)
+
+        # Get Sensor Group
+        sg_id = int(request.POST["sg"])
+        sg = SensorGroup.objects.filter(sg_id=sg_id)
+        # print(sg[0])
+
+        # Get sensor name
+        new_sns = request.POST["new_sns"]
+
+        message = ""
+
+        # Location list
+        if user[0].position=="org_admin":
+            try:
+                new_sns = Sensor(sensor_name=new_sns, sg=sg[0])
+                new_sns.save()
+                message = "Sensor Saved Successfully"
+                # print(message)
+
+            except Exception:
+                message = "Error Saving Sensor"
+                # print(message)
+                
+        else:
+            message = "Unauthorised User!"
+
+        print(message)
+
+        return JsonResponse(message, safe = False) 
+   
 
 def chart_js(request):
 
@@ -1149,8 +1259,6 @@ def getMotifs(request):
             
         return JsonResponse(list(data_list) , safe=False)
 
-
-
 @csrf_exempt
 def getADFT(request):
 
@@ -1173,11 +1281,169 @@ def getADFT(request):
 
     return JsonResponse(adfuller(data) , safe=False)
 
-
 # Add/Edit Page render
 def add_edit(request):
-    mapper={
-    'heading':'Organization Hierarchy',
+    if 'user' in request.session:
+        #print(request.session['user'])
 
+        user = Users.objects.filter(username=request.session['user']) 
+        org = user[0].org     
+        user_loc = (user[0].loc)     
+
+        # Location list
+        if user[0].position=="org_admin":
+            locations = Location.objects.filter(org=org)
+
+        else:
+            locations = Location.objects.filter(loc_id=user_loc.loc_id)
+
+        print("Location id of user is :" , user_loc.loc_name)
+
+        mapper={
+            'locations':locations,
+            'heading':'Organization Hierarchy',
+            'display':'block'
+        }
+        return render(request,'add_edit.html',mapper)
+    else:
+        return HttpResponseRedirect("/")
+
+    # mapper={
+    # 'heading':'Organization Hierarchy',
+
+    # }
+    # return render(request,"add_edit.html",mapper)
+
+# Render Org Chart
+@csrf_exempt
+def renderOrgChart(request):
+    message = "Chart Rendered!"
+    print(message)
+
+    # Initialise the return list
+    data_list = [{'nodeBinding': {
+                        'field_0': "name"
+                    }
+                }]
+
+    data_list[0]['nodes'] = []
+
+
+    # Variables
+    id = 1
+    pid = 1
+
+    user = Users.objects.filter(username=request.session['user']) 
+
+    # Organisation
+    org = user[0].org  
+
+    obj = {
+        'id': id,
+        'name': org.org_name,
+        'type': "org",
+        'db_id': org.org_id
     }
-    return render(request,"add_edit.html",mapper)
+
+    data_list[0]['nodes'].append(obj)
+
+    id = id + 1
+
+    # Location list
+    locations = Location.objects.filter(org=org)
+
+    # Loop for every location
+    for location in locations:
+
+        obj = {
+            'id': id,
+            'pid': pid,
+            'name': location.loc_name,
+            'type': "loc",
+            'db_id': location.loc_id
+        }
+
+        data_list[0]['nodes'].append(obj)
+
+        sg_pid = id
+
+        id = id + 1
+
+        sgs = SensorGroup.objects.filter(loc=location)
+
+        # Loop for every Sg
+        for sg in sgs:
+
+            obj = {
+                'id': id,
+                'pid': sg_pid,
+                'name': sg.sg_name,
+                'type': "sg",
+                'db_id': sg.sg_id
+            }
+
+            data_list[0]['nodes'].append(obj)
+
+            sns_pid = id
+
+            id = id + 1
+
+            sensors = Sensor.objects.filter(sg=sg)
+
+            # Loop for every Sensor
+            for sensor in sensors:
+
+                obj = {
+                    'id': id,
+                    'pid': sns_pid,
+                    'name': sensor.sensor_name,
+                    'type': "loc",
+                    'db_id': sensor.sensor_id
+                }
+
+                data_list[0]['nodes'].append(obj)
+
+                id = id + 1
+    
+
+    # data_list = [{'nodeBinding': {
+    #         'field_0': "name"
+    #     },
+    #     'nodes': [{ 'id': 1, 'name': "Amber McKenzie", 'type': "location", 'db_id': "11" },
+    #         { 'id': 2, 'pid': 1, 'name': "Ava Field" },
+    #         { 'id': 3, 'pid': 1, 'name': "Peter Stevens" },
+    #         { 'id': 4, 'pid': 2, 'name': "Avi " }]
+    # }]
+
+
+
+    # try:
+    #     if sensors_data:
+
+    #         # Create data points with corresponding time
+    #         lst = []
+
+    #         for i in range(len(sensors_data)):
+    #             time = timestamps[i] #datetime.strptime(timestamps[i], '%Y-%m-%d %H:%M:%S')
+    #             value = {
+    #                 'x' : time,
+    #                 'y' : sensors_data[i]
+    #             }
+
+    #             lst.append(value)
+
+    #         obj = {
+    #             'label' : name,
+    #             'data' : lst 
+    #         }
+
+    #         data_list.append(obj)
+
+    # except Exception:
+    #     request.data['error_message'] = Exception
+    #     return JsonResponse(request.data)
+    
+    return JsonResponse(list(data_list) , safe=False)
+
+    return JsonResponse(message , safe=False)
+
