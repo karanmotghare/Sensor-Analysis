@@ -46,6 +46,8 @@ urlpatterns = [
     path('getStatistics', views.getStatistics, name='getStatistics'),
     path('getMotifs', views.getMotifs, name='getMotifs'),
     path('getADFT', views.getADFT, name='getADFT'),
+    path('add_edit', views.add_edit, name='add_edit'),
+
     # path('getDataGen', views.data_Gen, name='getDataGen'),
 
 ]
