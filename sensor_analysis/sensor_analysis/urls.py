@@ -47,6 +47,10 @@ urlpatterns = [
     path('getMotifs', views.getMotifs, name='getMotifs'),
     path('getADFT', views.getADFT, name='getADFT'),
     path('add_edit', views.add_edit, name='add_edit'),
+    path('addNewLoc', views.addNewLoc, name='addNewLoc'),
+    path('addNewSg', views.addNewSg, name='addNewSg'),
+    path('addNewSns', views.addNewSns, name='addNewSns'),
+    path('renderOrgChart', views.renderOrgChart, name='renderOrgChart')
 
     # path('getDataGen', views.data_Gen, name='getDataGen'),
 

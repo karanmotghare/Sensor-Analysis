@@ -23,6 +23,138 @@ function drop() {
     }
 }
 
+// Functions to allow org_admin to save certain elements
+
+function save_location(){
+    console.log("Saving Location... ");
+
+    // Get id of selected location
+    var x = document.getElementById('loc_name');
+    var name = x.value;
+
+    $.ajax({
+        type: "POST",
+        url: 'addNewLoc',
+        data: {
+            'new_location': name,
+            'csrfmiddlewaretoken': '{{ csrf_token }}',
+        },
+
+        success: function (message) {
+            let html_data = message;//'<option value="" disabled selected>Select Sensor group</option>';
+            // sg.forEach(function (sg) {
+            //     html_data += `<option id="sgrp_id" value="${sg.sg_id}">${sg.sg_name}</option>`
+            // });
+
+            var sengrp = document.getElementById('message');
+            prev_data = sengrp.innerHTML
+
+            sengrp.innerHTML = html_data;
+            // change_sg(page);
+        }
+    });
+}
+
+function save_sg(){
+    console.log("Saving Sensor Group... ");
+
+    // Get id of selected location
+    var x = document.getElementById('loc_sg_modal');
+    var loc = x.value;
+
+    var y = document.getElementById('sg_name');
+    var sg = y.value;
+
+    $.ajax({
+        type: "POST",
+        url: 'addNewSg',
+        data: {
+            'location': loc,
+            'new_sg' : sg,
+            'csrfmiddlewaretoken': '{{ csrf_token }}',
+        },
+
+        success: function (message) {
+            let html_data = message;//'<option value="" disabled selected>Select Sensor group</option>';
+            // sg.forEach(function (sg) {
+            //     html_data += `<option id="sgrp_id" value="${sg.sg_id}">${sg.sg_name}</option>`
+            // });
+
+            var sengrp = document.getElementById('message');
+            prev_data = sengrp.innerHTML
+
+            sengrp.innerHTML = html_data;
+            // change_sg(page);
+        }
+    });
+}
+
+function save_sns(){
+    console.log("Saving Sensor ... ");
+
+    // Get id of selected location
+    var x = document.getElementById('loc_sns_modal');
+    var loc = x.value;
+
+    var y = document.getElementById('sngrp_sns_modal');
+    var sg = y.value;
+
+    var z = document.getElementById('sns_name');
+    var sns = z.value;
+
+    $.ajax({
+        type: "POST",
+        url: 'addNewSns',
+        data: {
+            'location': loc,
+            'sg' : sg,
+            'new_sns' : sns,
+            'csrfmiddlewaretoken': '{{ csrf_token }}',
+        },
+
+        success: function (message) {
+            let html_data = message;//'<option value="" disabled selected>Select Sensor group</option>';
+            // sg.forEach(function (sg) {
+            //     html_data += `<option id="sgrp_id" value="${sg.sg_id}">${sg.sg_name}</option>`
+            // });
+
+            var sengrp = document.getElementById('message');
+            prev_data = sengrp.innerHTML
+
+            sengrp.innerHTML = html_data;
+            // change_sg(page);
+        }
+    });
+}
+
+function change_location_2(){
+    console.log("Location value changed");
+
+    // Get id of selected location
+    var x = document.getElementById('loc_sns_modal');
+    var id = x.value;
+
+    $.ajax({
+        type: "POST",
+        url: 'getSgAjax',
+        data: {
+            'location_id': id,
+            'csrfmiddlewaretoken': '{{ csrf_token }}',
+        },
+
+        success: function (sg) {
+            let html_data = '<option value="" disabled selected>Select Sensor group</option>';
+            sg.forEach(function (sg) {
+                html_data += `<option id="sgrp_id" value="${sg.sg_id}">${sg.sg_name}</option>`
+            });
+
+            var sengrp = document.getElementById('sngrp_sns_modal');
+            sengrp.innerHTML = html_data;
+            // change_sg(page);
+        }
+    });
+
+}
 
 // Functions to facilitate graph attributes selection on homepage
 
@@ -117,7 +249,6 @@ function change_sensor() {
         }
     });
 }
-
 
 
 // Function to add sensor to compare on homepage
@@ -1881,6 +2012,46 @@ function movingAvg(array, count) {
     // console.log(result)
     return result;
 }
+
+// Function to render org chart
+function renderOrgChart(){
+    console.log("Rendering...");
+    $.ajax({
+        type: "POST",
+        url: 'renderOrgChart',
+        data: {
+            'csrfmiddlewaretoken': '{{ csrf_token }}',
+        },
+
+        success: function (data) {
+            console.log("Chart Rendered", data);
+
+            // Adding certain options/configs
+            data[0]['mouseScrool'] = OrgChart.action.ctrlZoom//OrgChart.action.scroll;
+            data[0]['enableSearch'] = false;
+            console.log(data[0])
+
+            var chart = new OrgChart(document.getElementById("tree"), (data[0]));
+
+            // chart.scroll= OrgChart.action.ctrlZoom;
+
+            chart.on('click', function(sender, args){
+        
+                return false; //to cansel the click event
+            });
+
+            chart.mouseScrool = OrgChart.action.scroll;
+            chart.enableSearch =  false;
+
+            // var newWindow = window.open('chartJS');
+
+            // localStorage.setItem('sensors_data', JSON.stringify(sensors_data));
+            // localStorage.setItem('chart_type', 'time');
+        }
+
+    })
+}
+
 
 // function get_ADFT() {
 //     console.log("Function called...");
