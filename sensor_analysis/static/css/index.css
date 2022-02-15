@@ -374,3 +374,24 @@ td{
     fill: #b5e48c;
 }
 
+[data-l='0'] text {
+    font-size: 40px !important;
+}
+
+[data-l='1'] text {
+    font-size: 35px !important;
+}
+
+[data-l='2'] text {
+    font-size: 30px !important;
+}
+
+[data-l='3'] text {
+    font-size: 25px !important;
+}
+
+#tree>svg {
+    viewBox: "-323.70938328487546 ,-370.4249983043996 ,2134.337651982125 ,1711.381851532059" !important;
+    /* background-color: #000; */
+}
+
