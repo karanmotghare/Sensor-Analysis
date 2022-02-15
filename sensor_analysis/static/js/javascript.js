@@ -2026,6 +2026,9 @@ function renderOrgChart(){
         success: function (data) {
             console.log("Chart Rendered", data);
 
+            OrgChart.scroll.smooth = -120;
+            OrgChart.scroll.speed = -120;  
+
             // Adding certain options/configs
             data[0]['mouseScrool'] = OrgChart.action.ctrlZoom//OrgChart.action.scroll;
             data[0]['enableSearch'] = false;
@@ -2034,14 +2037,18 @@ function renderOrgChart(){
             var chart = new OrgChart(document.getElementById("tree"), (data[0]));
 
             // chart.scroll= OrgChart.action.ctrlZoom;
+            // setTimeout(()=>  
+            //     document.getElementsByTagName("svg")[0].setAttribute("viewBox", "-323.70938328487546 -370.4249983043996 2134.337651982125 1711.381851532059")
+            // ,500);
 
             chart.on('click', function(sender, args){
         
                 return false; //to cansel the click event
             });
 
-            chart.mouseScrool = OrgChart.action.scroll;
-            chart.enableSearch =  false;
+            
+            // chart.mouseScrool = OrgChart.action.scroll;
+            // chart.enableSearch =  false;
 
             // var newWindow = window.open('chartJS');
 
