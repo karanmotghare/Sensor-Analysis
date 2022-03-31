@@ -535,6 +535,84 @@ function getRandomColor() {
     return color;
 }
 
+// Calculate standard deviation
+function dev(arr){
+    // Creating the mean with Array.reduce
+    let mean = arr.reduce((acc, curr)=>{
+      return acc + curr
+    }, 0) / arr.length;
+     
+    // Assigning (value - mean) ^ 2 to every array item
+    arr = arr.map((k)=>{
+      return (k - mean) ** 2
+    })
+     
+    // Calculating the sum of updated array
+   let sum = arr.reduce((acc, curr)=> acc + curr, 0);
+    
+   // Calculating the variance
+   let variance = sum / arr.length
+    
+   // Returning the Standered deviation
+   return Math.sqrt(sum / arr.length)
+  }
+
+// Calculate mean
+function mean(grades){
+    var total = 0;
+    for(var i = 0; i < grades.length; i++) {
+        total += grades[i];
+    }
+    var avg = total / grades.length;
+
+    return avg;
+} 
+
+// Function to find out oultiers
+function find_outliers(values){
+    
+    // define a list to accumlate anomalies
+    anomalies = [];
+    console.log(values);
+    //  Set upper and lower limit to 3 standard deviation
+    random_data_std = dev(values);
+    console.log(random_data_std);
+    random_data_mean = mean(values);
+    console.log(random_data_mean);
+    anomaly_cut_off = random_data_std * 3;
+    
+    lower_limit  = random_data_mean - anomaly_cut_off;
+    upper_limit = random_data_mean + anomaly_cut_off;
+    // print(lower_limit)
+    // Generate outliers
+    for(var i=0;i<values.length;i++){
+        if( values[i] > upper_limit || values[i] < lower_limit){
+            anomalies.push(values[i]);
+        }
+    }
+    
+    return anomalies;
+}
+
+// Function to highlight outliers
+function customRadius( context )
+  {
+    let index = context.dataIndex;
+    let name = "outliers_" + (context.datasetIndex).toString();
+    // console.log(name);
+    let value = parseFloat(context.dataset.data[ index ]["y"]);
+    var outliers = JSON.parse(localStorage.getItem(name));
+    // console.log(value);
+    for(var i=0; i<outliers.length;i++){
+        if(outliers[i]==value){
+            console.log("Outlier found : ", value);
+            return 15;
+
+        }
+    }
+    return 1;
+  }
+
 // Function to return regression chart
 function regression_chart(dataset, id, order, eq_id) {
     var reg = document.getElementById(id).getContext('2d');
@@ -897,6 +975,85 @@ function displayGraph() {
             }
         }
     });
+
+
+
+    // Finding out outliers
+
+    outliers_dataset = [];
+
+    // For every sensor
+    for (var i = 0; i < sensors_data.length; i++) {
+        // console.log(sensors_data[i]);
+        // console.log(sensors_data[i]['label']);
+
+        var values = [];
+        var data = [];
+
+        // For every date-value pair for that sensor
+        for (var j = 0; j < sensors_data[i]['data'].length; j++) {
+
+            values.push(parseFloat(sensors_data[i]['data'][j]['y']));
+
+            var val = {
+                x: sensors_data[i]['data'][j]['x'],
+                y: sensors_data[i]['data'][j]['y']
+            };
+
+            data.push(val);
+        }
+
+        current_outliers = find_outliers(values);
+        // console.log(current_outliers);
+        var naming = "outliers_" + (i).toString();
+        localStorage.setItem(naming, JSON.stringify(current_outliers));
+
+        // outliers.push(current_outliers);
+
+        var obj = {
+            label: sensors_data[i]['label'],
+            borderColor: getRandomColor(),
+            fill: false,
+            tension: 0,
+            radius: customRadius,
+            data: data
+        };
+
+        outliers_dataset.push(obj);
+
+    
+    }
+
+
+    var ctx = document.getElementById('outliers_chart').getContext('2d');
+    var chart = new Chart(ctx, {
+        type: 'line',
+        plugins: [
+            ChartRegressions
+        ],
+        data: { datasets: outliers_dataset },
+        options: {
+            scales: {
+                xAxes: [{
+                    type: localStorage.getItem('chart_type')//'linear'
+                }]
+            },
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                title: {
+                    display: true,
+                    text: 'Chart.js Line Chart'
+                }
+            }
+        }
+    });
+
+   
+
+
 
 
     // Linear Regression Curve

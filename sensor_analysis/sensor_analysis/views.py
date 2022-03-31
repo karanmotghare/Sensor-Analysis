@@ -12,7 +12,7 @@ from datetime import datetime, timedelta
 import numpy
 from scipy import stats
 from scipy.stats import pearsonr
-from statsmodels.tsa.stattools import adfuller
+# from statsmodels.tsa.stattools import adfuller
 
 #from models import SuperAdmins
 
@@ -642,7 +642,7 @@ def dataGen(request):
         else:
             locations = Location.objects.filter(loc_id=user_loc.loc_id)
 
-        print("Location id of user is :" , user_loc.loc_name)
+        # print("Location id of user is :" , user_loc.loc_name)
 
         mapper={
             'locations':locations,
@@ -697,7 +697,7 @@ def savedData(request):
         else:
             locations = Location.objects.filter(loc_id=user_loc.loc_id)
 
-        print("Location id of user is :" , user_loc.loc_name)
+        # print("Location id of user is :" , user_loc.loc_name)
 
         mapper={
             'locations':locations,
@@ -1297,7 +1297,7 @@ def add_edit(request):
         else:
             locations = Location.objects.filter(loc_id=user_loc.loc_id)
 
-        print("Location id of user is :" , user_loc.loc_name)
+        # print("Location id of user is :" , user_loc.loc_name)
 
         mapper={
             'locations':locations,
