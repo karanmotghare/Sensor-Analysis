@@ -50,7 +50,8 @@ urlpatterns = [
     path('addNewLoc', views.addNewLoc, name='addNewLoc'),
     path('addNewSg', views.addNewSg, name='addNewSg'),
     path('addNewSns', views.addNewSns, name='addNewSns'),
-    path('renderOrgChart', views.renderOrgChart, name='renderOrgChart')
+    path('renderOrgChart', views.renderOrgChart, name='renderOrgChart'),
+    path('renderOrgChart2', views.renderOrgChart2, name='renderOrgChart2')
 
     # path('getDataGen', views.data_Gen, name='getDataGen'),
 

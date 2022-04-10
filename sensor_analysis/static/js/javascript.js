@@ -2216,6 +2216,43 @@ function renderOrgChart(){
     })
 }
 
+// Function to render org chart
+var org_chart;
+
+function renderOrgChart2(){
+    console.log("Rendering...");
+    $.ajax({
+        type: "POST",
+        url: 'renderOrgChart2',
+        data: {
+            'csrfmiddlewaretoken': '{{ csrf_token }}',
+        },
+
+        success: function (dataset) {
+
+            var cssClassNames = {
+                'org_head': 'org_head',
+                'location': 'location',
+                'sns_grp' : 'sns_grp',
+                'sns' : 'sns'
+            };
+
+            var data = new google.visualization.DataTable();
+            data.addColumn('string', 'Name');
+            data.addColumn('string', 'Parent');
+            data.addColumn('string', 'ToolTip');
+            data.addRows(dataset)
+            console.log("Chart Rendered", dataset);
+
+            // Create the chart.
+            var org_chart = new google.visualization.OrgChart(document.getElementById('tree'));
+            // Draw the chart, setting the allowHtml option to true for the tooltips.
+            org_chart.draw(data, {'allowHtml':true, 'allowCollapse':true, 'cssClassNames': cssClassNames});
+
+        }
+
+    })
+}
 
 // function get_ADFT() {
 //     console.log("Function called...");

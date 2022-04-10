@@ -1404,46 +1404,106 @@ def renderOrgChart(request):
                 data_list[0]['nodes'].append(obj)
 
                 id = id + 1
-    
 
-    # data_list = [{'nodeBinding': {
-    #         'field_0': "name"
-    #     },
-    #     'nodes': [{ 'id': 1, 'name': "Amber McKenzie", 'type': "location", 'db_id': "11" },
-    #         { 'id': 2, 'pid': 1, 'name': "Ava Field" },
-    #         { 'id': 3, 'pid': 1, 'name': "Peter Stevens" },
-    #         { 'id': 4, 'pid': 2, 'name': "Avi " }]
-    # }]
-
-
-
-    # try:
-    #     if sensors_data:
-
-    #         # Create data points with corresponding time
-    #         lst = []
-
-    #         for i in range(len(sensors_data)):
-    #             time = timestamps[i] #datetime.strptime(timestamps[i], '%Y-%m-%d %H:%M:%S')
-    #             value = {
-    #                 'x' : time,
-    #                 'y' : sensors_data[i]
-    #             }
-
-    #             lst.append(value)
-
-    #         obj = {
-    #             'label' : name,
-    #             'data' : lst 
-    #         }
-
-    #         data_list.append(obj)
-
-    # except Exception:
-    #     request.data['error_message'] = Exception
-    #     return JsonResponse(request.data)
     
     return JsonResponse(list(data_list) , safe=False)
 
     return JsonResponse(message , safe=False)
 
+# Render Org Chart
+@csrf_exempt
+def renderOrgChart2(request):
+    message = "Chart Rendered!"
+    print(message)
+
+    # Initialise the return list
+    data_list = []
+
+    # data_list[0]['nodes'] = []
+
+
+    # Variables
+    id = 1
+    pid = 1
+
+    user = Users.objects.filter(username=request.session['user']) 
+
+    # Organisation
+    org = user[0].org  
+    pid_name = org.org_name
+    obj = [ {'v': org.org_name, 'f':'<div class=org_head>' + org.org_name + '</div>'}, '', '']
+    # {
+    #     'id': id,
+    #     'name': org.org_name,
+    #     'type': "org",
+    #     'db_id': org.org_id
+    # }
+
+    data_list.append(obj)
+
+    id = id + 1
+
+    # Location list
+    locations = Location.objects.filter(org=org)
+
+    # Loop for every location
+    for location in locations:
+
+        obj = [{'v': location.loc_name, 'f':'<div class=location>' + location.loc_name + '</div>'}, pid_name, 'id : ' + str(location.loc_id)]
+
+        # obj = {
+        #     'id': id,
+        #     'pid': pid,
+        #     'name': location.loc_name,
+        #     'type': "loc",
+        #     'db_id': location.loc_id
+        # }
+
+        data_list.append(obj)
+
+        sg_pid = id
+        sg_pid_name = location.loc_name
+
+        id = id + 1
+
+        sgs = SensorGroup.objects.filter(loc=location)
+
+        # Loop for every Sg
+        for sg in sgs:
+
+            obj = [{'v': str(sg.sg_id) + '_' + sg.sg_name, 'f':'<div class=sns_grp>' + str(sg.sg_id) + '_' + sg.sg_name + '</div>'}, sg_pid_name, 'id : ' + str(sg.sg_id)]
+            # obj = {
+            #     'id': id,
+            #     'pid': sg_pid,
+            #     'name': sg.sg_name,
+            #     'type': "sg",
+            #     'db_id': sg.sg_id
+            # }
+
+            data_list.append(obj)
+
+            sns_pid = id
+            sns_pid_name = str(sg.sg_id) + '_' + sg.sg_name
+
+            id = id + 1
+
+            sensors = Sensor.objects.filter(sg=sg)
+
+            # Loop for every Sensor
+            for sensor in sensors:
+
+                obj = [{'v': str(sensor.sensor_id) + '_' + sensor.sensor_name, 'f':'<div class=sns>' + str(sensor.sensor_id) + '_' + sensor.sensor_name + '</div>'}, sns_pid_name, 'id : ' + str(sensor.sensor_id)]
+                # obj = {
+                #     'id': id,
+                #     'pid': sns_pid,
+                #     'name': sensor.sensor_name,
+                #     'type': "loc",
+                #     'db_id': sensor.sensor_id
+                # }
+
+                data_list.append(obj)
+
+                id = id + 1
+
+    print(data_list)
+    return JsonResponse(list(data_list) , safe=False)
