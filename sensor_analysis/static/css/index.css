@@ -395,3 +395,65 @@ td{
     /* background-color: #000; */
 }
 
+#tree {
+    width: initial;
+    overflow-x: auto;
+    overflow-y: hidden;
+    margin: 5% 5% 5% 5%;
+    border: 1px solid dodgerblue;
+    padding: 5px 5px 5px 5px;
+}
+
+#labels {
+    margin: 5% 5% 5% 5%;
+    border: 1px solid dodgerblue;
+    padding: 5px 5px 5px 5px;   
+}
+
+.org_head {
+    background-color: orangered;
+    color: aliceblue;
+    font-size: xxx-large;
+}
+
+.location {
+    background-color:sandybrown;
+    color: white;
+    font-size: large;
+}
+
+.sns_grp {
+    background-color:lightgreen;
+    color: royalblue;
+    font-size: small;
+}
+
+.sns {
+    background-color:lightblue;
+    color: darkblue;
+}
+
+.box {
+    float: left;
+    height: 20px;
+    width: 20px;
+    /* margin-bottom: 15px; */
+    border: 1px solid black;
+    clear: both;
+  }
+  
+  .orangered {
+    background-color: orangered;
+  }
+  
+  .sandybrown {
+    background-color: sandybrown;
+  }
+  
+  .lightgreen {
+    background-color: lightgreen;
+  }
+
+  .lightblue {
+    background-color: lightblue;
+  }

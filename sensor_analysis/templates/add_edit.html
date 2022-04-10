@@ -170,9 +170,23 @@
             </div>
         </div>
     </div>
-    <div id="tree"></div>
+    
+    <div class="row" id="labels"> 
+        <table id="labels_table" style="width: 100%;">
+            <tr>
+                <td style="text-align:left; padding-left: 5%;"><div class='box orangered'></div> &nbsp;Organisation</td>
+                <td style="text-align:left; padding-left: 5%;"><div class='box sandybrown'></div>  &nbsp;Locations </td>
+                <td style="text-align:left; padding-left: 5%;"><div class='box lightgreen'></div>  &nbsp;Sensor Groups </td>
+                <td style="text-align:left; padding-left: 5%;"><div class='box lightblue'></div>  &nbsp;Sensors </td>
+            </tr>
+        </table>
+    </div>
+    <div class='row' id="tree"></div>
+    
     <script>
-        renderOrgChart();
+        google.charts.load('current', {packages:["orgchart"]});
+        google.charts.setOnLoadCallback(renderOrgChart2);
+        // renderOrgChart2();
     </script>
 
     {%endblock body%}
