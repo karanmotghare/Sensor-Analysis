@@ -448,10 +448,11 @@ def getVersionsAjax(request):
     if request.method == "POST":
         sns_id = request.POST['sns_id']
         latest_v = 0
-
+        print(sns_id)
         try:
             if sns_id:
-                sensor = Sensor.objects.filter(sg_id = sns_id).first()
+                sensor = Sensor.objects.filter(sensor_id = sns_id).first()
+                print(sensor)
                 # Get the latest saved version in the database
                 versions = SensorGenData.objects.filter(sensor = sensor)
 
