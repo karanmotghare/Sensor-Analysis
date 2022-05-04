@@ -51,7 +51,11 @@ urlpatterns = [
     path('addNewSg', views.addNewSg, name='addNewSg'),
     path('addNewSns', views.addNewSns, name='addNewSns'),
     path('renderOrgChart', views.renderOrgChart, name='renderOrgChart'),
-    path('renderOrgChart2', views.renderOrgChart2, name='renderOrgChart2')
+    path('renderOrgChart2', views.renderOrgChart2, name='renderOrgChart2'),
+    path('summary', views.summary, name='summary'),
+    path('getFourierCoefficients', views.getFourierCoefficients, name='getFourierCoefficients'),
+    path('getCorrMatrix', views.getCorrMatrix, name='getCorrMatrix'),
+
 
     # path('getDataGen', views.data_Gen, name='getDataGen'),
 

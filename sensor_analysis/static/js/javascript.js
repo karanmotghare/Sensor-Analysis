@@ -413,7 +413,7 @@ $(function () {
 });
 
 // Generate graph
-function generate_graph() {
+function generate_graph(type="graph") {
 
 
     var from_time = document.getElementById('from_time').value;
@@ -451,32 +451,58 @@ function generate_graph() {
 
         console.log(JSON.stringify(data_list));
 
-        $.ajax({
-            type: "POST",
-            url: 'getDataValues',
-            data: {
-                'sensors': JSON.stringify(data_list),
-                'from_time': from_mysql,
-                'to_time': to_mysql,
-                'csrfmiddlewaretoken': '{{ csrf_token }}',
-            },
+        if(type=='graph'){
+            $.ajax({
+                type: "POST",
+                url: 'getDataValues',
+                data: {
+                    'sensors': JSON.stringify(data_list),
+                    'from_time': from_mysql,
+                    'to_time': to_mysql,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}',
+                },
+    
+                success: function (sensors_data) {
+                    console.log(sensors_data);
+                    var newWindow = window.open('chartJS');
+    
+                    localStorage.setItem('sensors_data', JSON.stringify(sensors_data));
+                    localStorage.setItem('chart_type', 'time');
+                }
+    
+            });
+        }
+        else if(type=='summary'){
+            $.ajax({
+                type: "POST",
+                url: 'getDataValues',
+                data: {
+                    'sensors': JSON.stringify(data_list),
+                    'from_time': from_mysql,
+                    'to_time': to_mysql,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}',
+                },
+    
+                success: function (sensors_data) {
+                    // console.log(sensors_data);
+                    console.log("Generating Summary...");
+                    var newWindow = window.open('summary');
+    
+                    localStorage.setItem('sensors_data', JSON.stringify(sensors_data));
+                    localStorage.setItem('chart_type', 'time');
+                }
+    
+            });
+        }
 
-            success: function (sensors_data) {
-                console.log(sensors_data);
-                var newWindow = window.open('chartJS');
-
-                localStorage.setItem('sensors_data', JSON.stringify(sensors_data));
-                localStorage.setItem('chart_type', 'time');
-            }
-
-        })
+        
 
     }
 
 
 }
 
-function generate_ver_graph() {
+function generate_ver_graph(type='graph') {
 
 
     // var from_time = document.getElementById('from_time').value;
@@ -501,24 +527,48 @@ function generate_ver_graph() {
 
         console.log(JSON.stringify(data_list));
 
-        $.ajax({
-            type: "POST",
-            url: 'getVersionData',
-            data: {
-                'sensors': JSON.stringify(data_list),
-                'csrfmiddlewaretoken': '{{ csrf_token }}',
-            },
+        if(type=="graph"){
+            $.ajax({
+                type: "POST",
+                url: 'getVersionData',
+                data: {
+                    'sensors': JSON.stringify(data_list),
+                    'csrfmiddlewaretoken': '{{ csrf_token }}',
+                },
+    
+                success: function (sensors_data) {
+                    console.log(sensors_data);
+                    var newWindow = window.open('chartJS');
+    
+                    localStorage.setItem('sensors_data', JSON.stringify(sensors_data));
+                    localStorage.setItem('chart_type', 'time');
+                }
+    
+            })
+    
+        }
+        else if(type=="summary"){
+            $.ajax({
+                type: "POST",
+                url: 'getVersionData',
+                data: {
+                    'sensors': JSON.stringify(data_list),
+                    'csrfmiddlewaretoken': '{{ csrf_token }}',
+                },
+    
+                success: function (sensors_data) {
+                    console.log("Generating summary...");
+                    var newWindow = window.open('summary');
+    
+                    localStorage.setItem('sensors_data', JSON.stringify(sensors_data));
+                    localStorage.setItem('chart_type', 'time');
+                }
+    
+            })
+    
+        }
 
-            success: function (sensors_data) {
-                console.log(sensors_data);
-                var newWindow = window.open('chartJS');
-
-                localStorage.setItem('sensors_data', JSON.stringify(sensors_data));
-                localStorage.setItem('chart_type', 'time');
-            }
-
-        })
-
+        
     }
 
 
@@ -1120,6 +1170,294 @@ function change_motif_percent() {
     create_motifs(window, cutoff, occur);
 }
 
+// Display SUMMARY REPORT
+function displaySummary(){
+    console.log("New window opened");
+    var sensors_data = JSON.parse(localStorage.getItem('sensors_data'));
+    localStorage.setItem('chart_type', 'time');
+    console.log(sensors_data);
+
+    // Create divs for every sensor
+
+    // For every sensor
+    for (var i = 0; i < sensors_data.length; i++) {
+        var index = i;
+        var curr_data = JSON.stringify([sensors_data[index]]);
+
+        var head = document.createElement("h3");
+        head.style = "text-align:center;"
+        head.innerHTML = sensors_data[index]['parent'] + " | " + sensors_data[index]["label"];
+        document.body.appendChild(head);
+
+        // Calculate statistics for displayed graph
+        $.ajax({
+            type: "POST",
+            url: 'getStatistics',
+            async: false,
+            data: {
+                'sensors_data': curr_data,
+                'csrfmiddlewaretoken': '{{ csrf_token }}',
+            },
+
+            success: function (table) {
+                // sensors_data = JSON.parse(localStorage.getItem('sensors_data'));
+                
+                console.log("Statistics calculated", sensors_data[index]);
+
+                // Create div for stats
+                var div = document.createElement("div");
+                div.className = "row stats";
+                div.style = "width: 100%; padding: 5% 10% 5% 10%; height: auto;";
+
+                var stats = document.createElement("div");
+                stats.className = "col-sm";
+                // sub_div_2.style = "width: 50%; padding: 10%; height: auto;";
+
+                var stats_table = document.createElement("table");
+                stats_table.className = "table table-striped table-bordered text-center";
+                stats_table.setAttribute("id", sensors_data[index]["label"].toString() + "_stats");
+
+                var head = document.createElement("h4");
+                head.style = "text-align:center;"
+                head.innerHTML = "STATISTICS";
+
+                // Create table in html
+                let html_data = '';
+
+                // console.log(table)
+
+                for (var i = 0; i < table.length; i++) {
+                    html_data += '<tr>'
+
+                    for (var j = 0; j < table[i].length; j++) {
+                        if (i == 0 || j == 0) {
+                            html_data += `<th>${table[i][j]}</th>`;
+                        }
+                        else {
+                            html_data += `<td>${table[i][j]}</td>`;
+                        }
+                    }
+
+                    html_data += '</tr>';
+                }
+
+                stats_table.innerHTML = html_data;
+
+                // sub_div_1.appendChild(canvas);
+                stats.appendChild(head);
+                stats.appendChild(stats_table);
+
+                // div.appendChild(sub_div_1);
+                div.appendChild(stats);
+                document.body.appendChild(div);
+            }
+        });
+
+        // Calculate Outliers for given data
+        var values = [];
+
+        // For every date-value pair for that sensor
+        for (var j = 0; j < sensors_data[i]['data'].length; j++) {
+
+            values.push(parseFloat(sensors_data[i]['data'][j]['y']));
+            
+            var val = {
+                x: sensors_data[i]['data'][j]['x'],
+                y: sensors_data[i]['data'][j]['y']
+            };
+
+            // data.push(val);
+        }
+
+        current_outliers = new Set(find_outliers(values));
+        console.log(current_outliers);
+        // var naming = "outliers_" + (i).toString();
+        // localStorage.setItem(naming, JSON.stringify(current_outliers));
+
+        console.log("Outliers calculated");
+
+        // Create div for stats
+        var div = document.createElement("div");
+        div.className = "row outliers";
+        div.style = "width: 100%; padding: 0% 10% 5% 10%; height: auto;";
+
+        var stats = document.createElement("div");
+        stats.className = "col-sm";
+        // sub_div_2.style = "width: 50%; padding: 10%; height: auto;";
+
+        var stats_table = document.createElement("table");
+        stats_table.className = "table table-striped table-bordered text-center";
+        stats_table.setAttribute("id", sensors_data[index]["label"].toString() + "_outliers");
+
+        var head = document.createElement("h4");
+        head.style = "text-align:center;"
+        head.innerHTML = "OUTLIERS";
+
+        // Create table in html
+        let html_data = '<tr><th>Sr.</th><th>Value</th><th>Time</th></tr>';
+        var count = 1;
+
+        // For every date-value pair for that sensor
+        for (var j = 0; j < sensors_data[i]['data'].length; j++) {
+
+            value = parseFloat(sensors_data[i]['data'][j]['y']);
+            time = sensors_data[i]['data'][j]['x']
+
+            if(current_outliers.has(value)){
+                html_data += `<tr><td>${count}</td><td>${value}</td><td>${time}</td></tr>`;
+                count += 1;
+            }
+
+            // data.push(val);
+        }
+
+        stats_table.innerHTML = html_data;
+
+        // sub_div_1.appendChild(canvas);
+        stats.appendChild(head);
+        stats.appendChild(stats_table);
+
+        // div.appendChild(sub_div_1);
+        div.appendChild(stats);
+        document.body.appendChild(div);
+
+
+        // Calculate Fourier Transform Coefficients
+        $.ajax({
+            type: "POST",
+            async: false,
+            url: 'getFourierCoefficients',
+            data: {
+                'sensors_data': curr_data,
+                'csrfmiddlewaretoken': '{{ csrf_token }}',
+            },
+
+            success: function (table) {
+                // sensors_data = JSON.parse(localStorage.getItem('sensors_data'));
+                
+                console.log("Fourier Coefficients calculated", sensors_data[index]);
+
+                // Create div for stats
+                var div = document.createElement("div");
+                div.className = "row fourier";
+                div.style = "width: 100%; padding: 0% 10% 5% 10%; height: auto;";
+
+                var stats = document.createElement("div");
+                stats.className = "col-sm";
+                // sub_div_2.style = "width: 50%; padding: 10%; height: auto;";
+
+                var stats_table = document.createElement("table");
+                stats_table.className = "table table-striped table-bordered text-center";
+                stats_table.setAttribute("id", sensors_data[index]["label"].toString() + "_fourier");
+
+                var head = document.createElement("h4");
+                head.style = "text-align:center;"
+                head.innerHTML = "FOURIER TRANSFORM COEFFICIENTS";
+
+                // Create table in html
+                let html_data = '';
+
+                // console.log(table)
+
+                for (var i = 0; i < table.length; i++) {
+                    html_data += '<tr>'
+
+                    for (var j = 0; j < table[i].length; j++) {
+                        if (i == 0) {
+                            html_data += `<th>${table[i][j]}</th>`;
+                        }
+                        else {
+                            html_data += `<td>${table[i][j]}</td>`;
+                        }
+                    }
+
+                    html_data += '</tr>';
+                }
+
+                stats_table.innerHTML = html_data;
+
+                // sub_div_1.appendChild(canvas);
+                stats.appendChild(head);
+                stats.appendChild(stats_table);
+
+                // div.appendChild(sub_div_1);
+                div.appendChild(stats);
+                document.body.appendChild(div);
+            }
+        });
+
+        // Create HR 
+        var hr = document.createElement("hr");
+        document.body.appendChild(hr);
+
+
+    }
+
+    // Calculate Correlation matrix for the given sensors
+    $.ajax({
+        type: "POST",
+        url: 'getCorrMatrix',
+        async: false,
+        data: {
+            'sensors_data': localStorage.getItem('sensors_data'),
+            'csrfmiddlewaretoken': '{{ csrf_token }}',
+        },
+
+        success: function (table) {
+            // sensors_data = JSON.parse(localStorage.getItem('sensors_data'));
+            
+            console.log("Correlation matrix calculated");
+
+            // Create div for stats
+            var div = document.createElement("div");
+            div.className = "row stats";
+            div.style = "width: 100%; padding: 0% 10% 5% 10%; height: auto;";
+
+            var stats = document.createElement("div");
+            stats.className = "col-sm";
+            // sub_div_2.style = "width: 50%; padding: 10%; height: auto;";
+
+            var stats_table = document.createElement("table");
+            stats_table.className = "table table-striped table-bordered text-center";
+            stats_table.setAttribute("id", "correlation");
+
+            var head = document.createElement("h4");
+            head.style = "text-align:center;"
+            head.innerHTML = "CORRELATION MATRIX";
+
+            // Create table in html
+            let html_data = '';
+
+            // console.log(table)
+
+            for (var i = 0; i < table.length; i++) {
+                html_data += '<tr>'
+
+                for (var j = 0; j < table[i].length; j++) {
+                    if (i == 0 || j == 0) {
+                        html_data += `<th>${table[i][j]}</th>`;
+                    }
+                    else {
+                        html_data += `<td>${table[i][j]}</td>`;
+                    }
+                }
+
+                html_data += '</tr>';
+            }
+
+            stats_table.innerHTML = html_data;
+
+            // sub_div_1.appendChild(canvas);
+            stats.appendChild(head);
+            stats.appendChild(stats_table);
+
+            // div.appendChild(sub_div_1);
+            div.appendChild(stats);
+            document.body.appendChild(div);
+        }
+    });
+}
+
 // DATA GENERATION FUNCTIONS
 
 // Dynamic rendering of divs 
@@ -1240,7 +1578,7 @@ function option_1_remove_from_list() {
     }
 }
 
-function option_1_generate_graph() {
+function option_1_generate_graph(type='graph') {
     var from_time = document.getElementById('from_time').value;
     var to_time = document.getElementById('to_time').value;
     var list = document.getElementById('selection_1').options;
@@ -1276,25 +1614,50 @@ function option_1_generate_graph() {
 
         console.log(JSON.stringify(data_list));
 
-        $.ajax({
-            type: "POST",
-            url: 'option_1_graph',
-            data: {
-                'sensors': JSON.stringify(data_list),
-                'from_time': from_mysql,
-                'to_time': to_mysql,
-                'csrfmiddlewaretoken': '{{ csrf_token }}',
-            },
+        if(type=="graph"){
+            $.ajax({
+                type: "POST",
+                url: 'option_1_graph',
+                data: {
+                    'sensors': JSON.stringify(data_list),
+                    'from_time': from_mysql,
+                    'to_time': to_mysql,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}',
+                },
+    
+                success: function (sensors_data) {
+                    console.log(sensors_data);
+                    var newWindow = window.open('chartJS');
+    
+                    localStorage.setItem('sensors_data', JSON.stringify(sensors_data));
+                    localStorage.setItem('chart_type', 'time');
+                }
+    
+            })
+        }
+        else if(type=="summary"){
+            $.ajax({
+                type: "POST",
+                url: 'option_1_graph',
+                data: {
+                    'sensors': JSON.stringify(data_list),
+                    'from_time': from_mysql,
+                    'to_time': to_mysql,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}',
+                },
+    
+                success: function (sensors_data) {
+                    console.log("Generating summary...");
+                    var newWindow = window.open('summary');
+    
+                    localStorage.setItem('sensors_data', JSON.stringify(sensors_data));
+                    localStorage.setItem('chart_type', 'time');
+                }
+    
+            })
+        }
 
-            success: function (sensors_data) {
-                console.log(sensors_data);
-                var newWindow = window.open('chartJS');
-
-                localStorage.setItem('sensors_data', JSON.stringify(sensors_data));
-                localStorage.setItem('chart_type', 'time');
-            }
-
-        })
+        
 
     }
 }
@@ -1448,7 +1811,7 @@ function option_2_remove_from_list() {
     }
 }
 
-function option_2_generate_graph() {
+function option_2_generate_graph(type="graph") {
     // var from_time = document.getElementById('from_time').value;
     // var to_time = document.getElementById('to_time').value;
     var list = document.getElementById('selection_2').options;
@@ -1469,25 +1832,50 @@ function option_2_generate_graph() {
 
         console.log(JSON.stringify(data_list));
 
-        $.ajax({
-            type: "POST",
-            url: 'option_2_graph',
-            data: {
-                'sensors': JSON.stringify(data_list),
-                // 'from_time' : from_mysql,
-                // 'to_time' : to_mysql,
-                'csrfmiddlewaretoken': '{{ csrf_token }}',
-            },
+        if(type=="graph"){
+            $.ajax({
+                type: "POST",
+                url: 'option_2_graph',
+                data: {
+                    'sensors': JSON.stringify(data_list),
+                    // 'from_time' : from_mysql,
+                    // 'to_time' : to_mysql,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}',
+                },
+    
+                success: function (sensors_data) {
+                    console.log(sensors_data);
+                    var newWindow = window.open('chartJS');
+    
+                    localStorage.setItem('sensors_data', JSON.stringify(sensors_data));
+                    localStorage.setItem('chart_type', 'time');
+                }
+    
+            })
+        }
+        else if(type=="summary"){
+            $.ajax({
+                type: "POST",
+                url: 'option_2_graph',
+                data: {
+                    'sensors': JSON.stringify(data_list),
+                    // 'from_time' : from_mysql,
+                    // 'to_time' : to_mysql,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}',
+                },
+    
+                success: function (sensors_data) {
+                    console.log("Generating summary...");
+                    var newWindow = window.open('summary');
+    
+                    localStorage.setItem('sensors_data', JSON.stringify(sensors_data));
+                    localStorage.setItem('chart_type', 'time');
+                }
+    
+            })
+        }
 
-            success: function (sensors_data) {
-                console.log(sensors_data);
-                var newWindow = window.open('chartJS');
-
-                localStorage.setItem('sensors_data', JSON.stringify(sensors_data));
-                localStorage.setItem('chart_type', 'time');
-            }
-
-        })
+        
 
     }
 }
@@ -1605,12 +1993,15 @@ function option_3_refresh_table() {
     }
 }
 
-function option_3_generate_graph() {
+function option_3_generate_graph(type="graph") {
 
     // Get sensor details
     var sensor = document.getElementById('sns_list');
     var sensor_id = sensor.value;
     var sensor_name = sensor.options[sensor.selectedIndex].text;
+    
+    var sns_grp = document.getElementById('sngrp_list');
+    var grp_name = sns_grp.options[sns_grp.selectedIndex].text;
 
     var table = document.getElementById('option_3_table');
     // console.log(table.rows[0].cells[1].getElementsByTagName("input")[0].value)
@@ -1647,26 +2038,51 @@ function option_3_generate_graph() {
         time_list = { "data": timestamp };
 
         // console.log(JSON.stringify(data_list));
-
-        $.ajax({
-            type: "POST",
-            url: 'option_3_graph',
-            data: {
-                'values': JSON.stringify(value_list),
-                'timestamp': JSON.stringify(time_list),
-                'name': sensor_name,
-                'csrfmiddlewaretoken': '{{ csrf_token }}',
-            },
-
-            success: function (sensors_data) {
-                console.log(sensors_data);
-                var newWindow = window.open('chartJS');
-
-                localStorage.setItem('sensors_data', JSON.stringify(sensors_data));
-                localStorage.setItem('chart_type', 'time');
-            }
-
-        })
+        if(type=="graph"){
+            $.ajax({
+                type: "POST",
+                url: 'option_3_graph',
+                data: {
+                    'values': JSON.stringify(value_list),
+                    'timestamp': JSON.stringify(time_list),
+                    'name': sensor_name,
+                    'grp_name': grp_name,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}',
+                },
+    
+                success: function (sensors_data) {
+                    console.log(sensors_data);
+                    var newWindow = window.open('chartJS');
+    
+                    localStorage.setItem('sensors_data', JSON.stringify(sensors_data));
+                    localStorage.setItem('chart_type', 'time');
+                }
+    
+            })
+        }
+        else if(type=="summary"){
+            $.ajax({
+                type: "POST",
+                url: 'option_3_graph',
+                data: {
+                    'values': JSON.stringify(value_list),
+                    'timestamp': JSON.stringify(time_list),
+                    'name': sensor_name,
+                    'grp_name': grp_name,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}',
+                },
+    
+                success: function (sensors_data) {
+                    console.log("Generating summary...");
+                    var newWindow = window.open('summary');
+    
+                    localStorage.setItem('sensors_data', JSON.stringify(sensors_data));
+                    localStorage.setItem('chart_type', 'time');
+                }
+    
+            })
+        }
+        
     }
 
 
@@ -1933,13 +2349,17 @@ function option_4_update_values() {
     }
 }
 
-function option_4_generate_graph() {
+function option_4_generate_graph(type="graph") {
 
 
     // Get sensor details
     var sensor = document.getElementById('sns_list');
     var sensor_id = sensor.value;
     var sensor_name = sensor.options[sensor.selectedIndex].text;
+
+    var sns_grp = document.getElementById('sngrp_list');
+    var grp_name = sns_grp.options[sns_grp.selectedIndex].text;
+
 
     var table = document.getElementById('option_4_table_vals');
     // console.log(table.rows[0].cells[1].getElementsByTagName("input")[0].value)
@@ -1976,91 +2396,52 @@ function option_4_generate_graph() {
         time_list = { "data": timestamp };
 
         // console.log(JSON.stringify(data_list));
-
-        $.ajax({
-            type: "POST",
-            url: 'option_3_graph',
-            data: {
-                'values': JSON.stringify(value_list),
-                'timestamp': JSON.stringify(time_list),
-                'name': sensor_name,
-                'csrfmiddlewaretoken': '{{ csrf_token }}',
-            },
-
-            success: function (sensors_data) {
-                console.log(sensors_data);
-                var newWindow = window.open('chartJS');
-
-                localStorage.setItem('sensors_data', JSON.stringify(sensors_data));
-                localStorage.setItem('chart_type', 'time');
-            }
-
-        })
+        if(type=="graph"){
+            $.ajax({
+                type: "POST",
+                url: 'option_4_graph',
+                data: {
+                    'values': JSON.stringify(value_list),
+                    'timestamp': JSON.stringify(time_list),
+                    'name': sensor_name,
+                    'grp_name': grp_name,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}',
+                },
+    
+                success: function (sensors_data) {
+                    console.log(sensors_data);
+                    var newWindow = window.open('chartJS');
+    
+                    localStorage.setItem('sensors_data', JSON.stringify(sensors_data));
+                    localStorage.setItem('chart_type', 'time');
+                }
+    
+            })
+        }
+        else if(type=="summary"){
+            $.ajax({
+                type: "POST",
+                url: 'option_4_graph',
+                data: {
+                    'values': JSON.stringify(value_list),
+                    'timestamp': JSON.stringify(time_list),
+                    'name': sensor_name,
+                    'grp_name': grp_name,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}',
+                },
+    
+                success: function (sensors_data) {
+                    // console.log(sensors_data);
+                    var newWindow = window.open('summary');
+    
+                    localStorage.setItem('sensors_data', JSON.stringify(sensors_data));
+                    localStorage.setItem('chart_type', 'time');
+                }
+    
+            })
+        }
+        
     }
-
-    // // Get sensor details
-    // var sensor = document.getElementById('sns_list');
-    // var sensor_id = sensor.value;
-    // var sensor_name = sensor.options[sensor.selectedIndex].text;
-
-    // var table = document.getElementById('option_4_table');
-    // // console.log(table.rows[0].cells[1].getElementsByTagName("input")[0].value)
-    // rows = table.rows.length;
-
-    // if (!sensor_id || rows <= 1) {
-    //     console.log("Invalid Selection !");
-    //     status_box = document.getElementById('status_box');
-    //     // selected_data = status_box.innerHTML;
-    //     selected_data = `Enter all Parameters`;
-    //     status_box.innerHTML = selected_data;
-    // }
-    // else {
-
-    //     coeffs = new Array(rows);
-    //     nums = new Array(rows);
-
-    //     for (var i = 0; i < rows; i++) {
-
-    //         num = table.rows[i].cells[0].innerHTML;
-    //         // console.log(date_time);
-
-    //         coeff = table.rows[i].cells[1].getElementsByTagName("input")[0].value;
-    //         // console.log(value);
-
-    //         coeffs[i] = parseInt(coeff);
-    //         nums[i] = parseInt(num);
-    //     }
-
-    //     console.log(coeffs);
-    //     console.log(nums);
-
-    //     values = fourier_series(coeffs, rows);
-
-    //     value_list = { "data": values };
-    //     time_list = { "data": nums };
-
-    //     // console.log(JSON.stringify(data_list));
-
-    //     $.ajax({
-    //         type: "POST",
-    //         url: 'option_4_graph',
-    //         data: {
-    //             'values': JSON.stringify(value_list),
-    //             'timestamp': JSON.stringify(time_list),
-    //             'name': sensor_name,
-    //             'csrfmiddlewaretoken': '{{ csrf_token }}',
-    //         },
-
-    //         success: function (sensors_data) {
-    //             console.log(sensors_data);
-    //             var newWindow = window.open('chartJS');
-
-    //             localStorage.setItem('sensors_data', JSON.stringify(sensors_data));
-    //             localStorage.setItem('chart_type', 'linear');
-    //         }
-
-    //     })
-    // }
 
 }
 

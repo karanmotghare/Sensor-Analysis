@@ -457,3 +457,8 @@ td{
   .lightblue {
     background-color: lightblue;
   }
+
+
+  hr{
+      border-top: 10px solid #eee;
+  }
