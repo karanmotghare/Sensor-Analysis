@@ -9,7 +9,7 @@ from models_dir.models import *
 import json
 import random
 from datetime import datetime, timedelta
-import numpy
+import numpy as np
 from scipy import stats
 from scipy.stats import pearsonr
 # from statsmodels.tsa.stattools import adfuller
@@ -401,6 +401,10 @@ def chart_js(request):
 
     return render(request,'chartdemo.html')
 
+def summary(request):
+
+    return render(request, 'summary.html')
+
 def data_Gen(request):
     mapper ={ 
     'heading':'Data Generation Portal',
@@ -491,6 +495,9 @@ def getDataValues(request):
                     sns = Sensor.objects.filter(sensor_id = val[2])
                     data = SensorActualData.objects.filter(sensor = sns[0], record_time__lte = to, record_time__gte = frm)
 
+                    sg = sns[0].sg.sg_name
+                    # print(sg)
+
                     lst = []
 
                     for point in data:
@@ -503,7 +510,8 @@ def getDataValues(request):
 
                     obj = {
                         'label' : sns[0].sensor_name,
-                        'data' : lst 
+                        'data' : lst,
+                        'parent' : sg 
                     }
 
                     data_list.append(obj)
@@ -533,6 +541,8 @@ def getVersionData(request):
                     version = int(val[3])
                     data = SensorGenData.objects.filter(sensor = sns[0], version_id = version)
 
+                    sg = sns[0].sg.sg_name
+
                     lst = []
 
                     value = {
@@ -552,7 +562,8 @@ def getVersionData(request):
 
                     obj = {
                         'label' : sns[0].sensor_name + " " + str(version),
-                        'data' : lst 
+                        'data' : lst,
+                        'parent' : sg 
                     }
 
                     data_list.append(obj)
@@ -729,6 +740,8 @@ def option_1_graph(request):
                 sensor = Sensor.objects.filter(sensor_id = values[2])
                 name = sensor[0].sensor_name
 
+                sg = sensor[0].sg.sg_name
+
                 # Divide the data equally for the given time interval
                 length = len(sensors_data)
                 
@@ -755,7 +768,8 @@ def option_1_graph(request):
 
                 obj = {
                     'label' : name,
-                    'data' : lst 
+                    'data' : lst ,
+                    'parent' : sg
                 }
 
                 data_list.append(obj)
@@ -841,6 +855,8 @@ def option_2_graph(request):
                 sensor = Sensor.objects.filter(sensor_id = values[2])
                 name = sensor[0].sensor_name
 
+                sg = sensor[0].sg.sg_name
+
                 # Create data points with corresponding time
                 lst = []
                 for point in sensors_data:
@@ -856,7 +872,8 @@ def option_2_graph(request):
 
                 obj = {
                     'label' : name,
-                    'data' : lst 
+                    'data' : lst ,
+                    'parent': sg
                 }
 
                 data_list.append(obj)
@@ -917,6 +934,7 @@ def option_3_graph(request):
         sensors_data = (json.loads(request.POST['values']))["data"]
         timestamps = (json.loads(request.POST['timestamp']))["data"]
         name = request.POST["name"]
+        parent = request.POST["grp_name"]
 
         # Initialise the return list
         data_list = []
@@ -938,7 +956,8 @@ def option_3_graph(request):
 
                 obj = {
                     'label' : name,
-                    'data' : lst 
+                    'data' : lst,
+                    'parent' : parent
                 }
 
                 data_list.append(obj)
@@ -992,13 +1011,14 @@ def option_3_insert_db(request):
         return JsonResponse(version_id , safe=False)
 
 
-# Function to create user generated graph for option 3
+# Function to create user generated graph for option 4
 @csrf_exempt
 def option_4_graph(request):
     if request.method=="POST":
         sensors_data = (json.loads(request.POST['values']))["data"]
         timestamps = (json.loads(request.POST['timestamp']))["data"]
         name = request.POST["name"]
+        parent = request.POST["grp_name"]
 
         # Initialise the return list
         data_list = []
@@ -1020,7 +1040,8 @@ def option_4_graph(request):
 
                 obj = {
                     'label' : name,
-                    'data' : lst 
+                    'data' : lst ,
+                    'parent': parent
                 }
 
                 data_list.append(obj)
@@ -1036,17 +1057,17 @@ def num_unique(data):
     return len(set(data))
 
 def mean_val(data):
-    return round(numpy.mean(data), 2)
+    return round(np.mean(data), 2)
 
 def quartile_val(data, num):
-    return round(numpy.percentile(data, num), 2)
+    return round(np.percentile(data, num), 2)
 
 def mode_val(data):
     print((stats.mode(data)).mode[0])
     return int((stats.mode(data)).mode[0])
 
 def std_val(data):
-    return round(numpy.std(data), 2)
+    return round(np.std(data), 2)
 
 @csrf_exempt
 def getStatistics(request):
@@ -1261,6 +1282,115 @@ def getMotifs(request):
         return JsonResponse(list(data_list) , safe=False)
 
 @csrf_exempt
+def getFourierCoefficients(request):
+
+    if request.method == "POST":
+        sensors_data = json.loads(request.POST['sensors_data']) 
+        # print(sensors_data)
+        
+        # Initialise the return list
+        data_list = [{
+            'Coefficient 1' : [],
+            'Coefficient 2' : [],
+            'Coefficient 3' : [],
+            'Coefficient 4' : [],
+            'Coefficient 5' : []
+        }]
+
+        # For each sensor in the list of data
+        for sensor in sensors_data:
+
+            data_points = [ int(float(data['y'])) for data in sensor['data'] ]
+
+            points = np.array(data_points)
+
+            coefficients = np.fft.fft(points)
+
+            coefficients = np.around(coefficients, 4)
+
+            # print(data_points)
+            data_list[0]['Coefficient 1'].append(str(coefficients[0]))
+
+            data_list[0]['Coefficient 2'].append(str(coefficients[1]))
+            
+            data_list[0]['Coefficient 3'].append(str(coefficients[2]))
+
+            data_list[0]['Coefficient 4'].append(str(coefficients[3]))
+
+            data_list[0]['Coefficient 5'].append(str(coefficients[4]))
+
+        print(data_list)
+        
+        # Converting the list to a particular format
+        result = [list(data_list[0].keys())]
+        
+        for i in range(len(sensors_data)):
+            new_row = []
+
+            new_row.append(data_list[0]['Coefficient 1'][i])
+            new_row.append(data_list[0]['Coefficient 2'][i])
+            new_row.append(data_list[0]['Coefficient 3'][i])
+            new_row.append(data_list[0]['Coefficient 4'][i])
+            new_row.append(data_list[0]['Coefficient 5'][i])
+
+            result.append(new_row)
+
+        print(result)
+
+        return JsonResponse(list(result) , safe=False)
+
+@csrf_exempt
+def getCorrMatrix(request):
+
+    if request.method == "POST":
+        sensors_data = json.loads(request.POST['sensors_data']) 
+        # print(sensors_data)
+        
+        # Initialise the return list
+        data_list = [{
+            'titles' : []
+        }]
+
+        # Initialise matrix
+        sns_names = []
+        for sensor in sensors_data:
+            # data_list[0]["titles"].append(sensor['label'])
+            # data_list[0][sensor['label']] = []
+            sns_names.append(sensor['parent'] + ' | ' + sensor['label'])
+
+
+        # Converting the list to a particular format
+        result = [["Titles"] + sns_names]
+        
+        for i in range(len(sensors_data)):
+            new_row = []
+
+            new_row.append(sns_names[i])
+
+            x_data = [ int(float(data['y'])) for data in sensors_data[i]['data'] ]
+
+            for j in range(0,i):
+                new_row.append(result[j+1][i+1])
+
+            new_row.append(1)
+
+            for j in range(i+1,len(sensors_data)):
+
+                y_data = [ int(float(data['y'])) for data in sensors_data[j]['data'] ]
+
+                # Pearson's Correlation
+                corr, _ = pearsonr(x_data, y_data)
+
+                new_row.append(corr)
+
+            result.append(new_row)
+
+        print(result)
+
+        return JsonResponse(list(result) , safe=False)
+
+
+@csrf_exempt
 def getADFT(request):
 
     try:
@@ -1308,12 +1438,6 @@ def add_edit(request):
         return render(request,'add_edit.html',mapper)
     else:
         return HttpResponseRedirect("/")
-
-    # mapper={
-    # 'heading':'Organization Hierarchy',
-
-    # }
-    # return render(request,"add_edit.html",mapper)
 
 # Render Org Chart
 @csrf_exempt
