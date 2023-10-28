@@ -82,9 +82,9 @@ WSGI_APPLICATION = 'sensor_analysis.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'sensor_analysis',
-        'USER': 'project',
-        'PASSWORD': '7776978935',
+        'NAME': '',
+        'USER': '',
+        'PASSWORD': '',
         'HOST':'localhost',
         'PORT':'3306',
     }
