@@ -27,6 +27,8 @@
 
     <!-- For Date and time  moment cdn -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js" integrity="sha512-qTXRIMyZIFb8iQcfjXWCO8+M5Tbc38Qi5WzdPOYZHIlZpzBHG3L3by84BBBOiRGiEb7KKtAOAs5qYdUiZiQNNQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://balkan.app/js/orgchart.js"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 
     {%endblock fonts%}
 
@@ -50,7 +52,9 @@
                     <a href="{%url 'logout'%}">
                         <li id="list_item">Logout</li>
                     </a>
-                    <li id="list_item">Profile</li>
+                    <a href="{%url 'add_edit'%}">
+                        <li id="add_edit">Add/Edit</li>
+                    </a>
                 </ul>
             </div>
         </div>
@@ -74,8 +78,8 @@
 
             <div class="log_menu">
                 <select name="admin_opt" id="admin_list">
-                    <option id="opt" value="s_admin" default>Super Admin</option>
                     <option id="opt" value="n_admin">Admin</option>
+                    <option id="opt" value="s_admin" default>Super Admin</option>
 
                 </select>
             </div>

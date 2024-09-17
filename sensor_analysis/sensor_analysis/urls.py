@@ -31,8 +31,11 @@ urlpatterns = [
     path('chartJS', views.chart_js, name='chart'),
     path('getSgAjax', views.getSgAjax, name='getSgAjax'),
     path('getSensorAjax', views.getSensorAjax, name='getSensorAjax'),
+    path('getVersionsAjax', views.getVersionsAjax, name='getVersionsAjax'),
     path('getDataValues', views.getDataValues, name='getDataValues'),
+    path('getVersionData', views.getVersionData, name='getVersionData'),
     path('dataGen', views.dataGen, name='dataGen'),
+    path('savedData', views.savedData, name='savedData'),
     path('option_1_graph', views.option_1_graph, name='option_1_graph'),
     path('option_2_graph', views.option_2_graph, name='option_2_graph'),
     path('option_3_graph', views.option_3_graph, name='option_3_graph'),
@@ -41,7 +44,19 @@ urlpatterns = [
     path('option_2_insert_db', views.option_2_insert_db, name='option_2_insert_db'),
     path('option_3_insert_db', views.option_3_insert_db, name='option_3_insert_db'),
     path('getStatistics', views.getStatistics, name='getStatistics'),
+    path('getMotifs', views.getMotifs, name='getMotifs'),
     path('getADFT', views.getADFT, name='getADFT'),
+    path('add_edit', views.add_edit, name='add_edit'),
+    path('addNewLoc', views.addNewLoc, name='addNewLoc'),
+    path('addNewSg', views.addNewSg, name='addNewSg'),
+    path('addNewSns', views.addNewSns, name='addNewSns'),
+    path('renderOrgChart', views.renderOrgChart, name='renderOrgChart'),
+    path('renderOrgChart2', views.renderOrgChart2, name='renderOrgChart2'),
+    path('summary', views.summary, name='summary'),
+    path('getFourierCoefficients', views.getFourierCoefficients, name='getFourierCoefficients'),
+    path('getCorrMatrix', views.getCorrMatrix, name='getCorrMatrix'),
+
+
     # path('getDataGen', views.data_Gen, name='getDataGen'),
 
 ]

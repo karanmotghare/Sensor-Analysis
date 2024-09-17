@@ -9,9 +9,10 @@ from models_dir.models import *
 import json
 import random
 from datetime import datetime, timedelta
-import numpy
+import numpy as np
 from scipy import stats
-from statsmodels.tsa.stattools import adfuller
+from scipy.stats import pearsonr
+# from statsmodels.tsa.stattools import adfuller
 
 #from models import SuperAdmins
 
@@ -97,15 +98,17 @@ def homepage(request):
         #print(request.session['user'])
 
         user = Users.objects.filter(username=request.session['user']) 
-        org = user[0].org       
+        org = user[0].org  
+        user_loc = (user[0].loc)     
 
         # Location list
-        locations = Location.objects.filter(org=org)
+        if user[0].position=="org_admin":
+            locations = Location.objects.filter(org=org)
+
+        else:
+            locations = Location.objects.filter(loc_id=user_loc.loc_id)        
 
         # Sensor Group List
-        
-
-
         mapper={
             'locations':locations,
             'heading':'Sensor Analysis',
@@ -279,9 +282,128 @@ def add_new_org(request):
     else:
         return HttpResponseRedirect('/')
 
+# Function to add new location
+@csrf_exempt
+def addNewLoc(request):
+
+    if 'user' in request.session:
+        #print(request.session['user'])
+
+        user = Users.objects.filter(username=request.session['user']) 
+        org = user[0].org     
+        # user_loc = (user[0].loc)   
+
+        # Get Location Name
+        location_name = request.POST["new_location"] 
+        message = ""
+
+        # Location list
+        if user[0].position=="org_admin":
+            try:
+                new_loc = Location(loc_name=location_name, org=org)
+                new_loc.save()
+                message = "Location Saved Successfully"
+
+            except Exception:
+                message = "Error Saving Location"
+                
+        else:
+            message = "Unauthorised User!"
+
+        print(message)
+
+        return JsonResponse(message, safe = False) 
+
+# Function to add new Sg
+@csrf_exempt
+def addNewSg(request):
+
+    if 'user' in request.session:
+        #print(request.session['user'])
+
+        user = Users.objects.filter(username=request.session['user']) 
+        org = user[0].org     
+        # user_loc = (user[0].loc)   
+
+        # Get Location id
+        location_id = int(request.POST["location"])
+        location = Location.objects.filter(loc_id=location_id)
+
+        # Get new Sensor Group
+        new_sg = request.POST["new_sg"]
+
+        message = ""
+
+        # Location list
+        if user[0].position=="org_admin":
+            try:
+                new_sg = SensorGroup(sg_name=new_sg, loc=location[0])
+                new_sg.save()
+                message = "Sensor Group Saved Successfully"
+
+            except Exception:
+                message = "Error Saving Sensor Group"
+                
+        else:
+            message = "Unauthorised User!"
+
+        print(message)
+
+        return JsonResponse(message, safe = False) 
+   
+
+# Function to add new Sensor
+@csrf_exempt
+def addNewSns(request):
+
+    if 'user' in request.session:
+        #print(request.session['user'])
+
+        user = Users.objects.filter(username=request.session['user']) 
+        org = user[0].org     
+        # user_loc = (user[0].loc)   
+
+        # Get Location id
+        location_id = int(request.POST["location"])
+        location = Location.objects.filter(loc_id=location_id)
+
+        # Get Sensor Group
+        sg_id = int(request.POST["sg"])
+        sg = SensorGroup.objects.filter(sg_id=sg_id)
+        # print(sg[0])
+
+        # Get sensor name
+        new_sns = request.POST["new_sns"]
+
+        message = ""
+
+        # Location list
+        if user[0].position=="org_admin":
+            try:
+                new_sns = Sensor(sensor_name=new_sns, sg=sg[0])
+                new_sns.save()
+                message = "Sensor Saved Successfully"
+                # print(message)
+
+            except Exception:
+                message = "Error Saving Sensor"
+                # print(message)
+                
+        else:
+            message = "Unauthorised User!"
+
+        print(message)
+
+        return JsonResponse(message, safe = False) 
+   
+
 def chart_js(request):
 
     return render(request,'chartdemo.html')
+
+def summary(request):
+
+    return render(request, 'summary.html')
 
 def data_Gen(request):
     mapper ={ 
@@ -323,6 +445,34 @@ def getSensorAjax(request):
             return JsonResponse(request.data)
         return JsonResponse(list(sensors.values('sensor_id', 'sensor_name')), safe = False) 
 
+# Function to load sensors
+@csrf_exempt
+def getVersionsAjax(request):
+
+    if request.method == "POST":
+        sns_id = request.POST['sns_id']
+        latest_v = 0
+        print(sns_id)
+        try:
+            if sns_id:
+                sensor = Sensor.objects.filter(sensor_id = sns_id).first()
+                print(sensor)
+                # Get the latest saved version in the database
+                versions = SensorGenData.objects.filter(sensor = sensor)
+
+                ver = versions.aggregate(Max('version_id'))
+    
+                if ver['version_id__max']:
+                    latest_v = ver['version_id__max']
+                
+            else:
+                sensors = Sensor.objects.none()
+        except Exception:
+            request.data['error_message'] = 'error'
+            return JsonResponse(request.data)
+        return JsonResponse(latest_v, safe = False) 
+
+
 # Function to get sensor data
 @csrf_exempt
 def getDataValues(request):
@@ -345,6 +495,9 @@ def getDataValues(request):
                     sns = Sensor.objects.filter(sensor_id = val[2])
                     data = SensorActualData.objects.filter(sensor = sns[0], record_time__lte = to, record_time__gte = frm)
 
+                    sg = sns[0].sg.sg_name
+                    # print(sg)
+
                     lst = []
 
                     for point in data:
@@ -357,7 +510,60 @@ def getDataValues(request):
 
                     obj = {
                         'label' : sns[0].sensor_name,
-                        'data' : lst 
+                        'data' : lst,
+                        'parent' : sg 
+                    }
+
+                    data_list.append(obj)
+
+        except Exception:
+            request.data['error_message'] = Exception
+            return JsonResponse(request.data)
+        
+        return JsonResponse(list(data_list) , safe=False)
+
+@csrf_exempt
+def getVersionData(request):
+
+    if request.method == "POST":
+        sensors_list = (json.loads(request.POST['sensors']))["data"]
+        
+        data_list = []
+        
+        try:
+            if sensors_list:
+                
+                # Get data for every sensor
+                for sensor in sensors_list:
+                    
+                    val = sensor.split(',')
+                    sns = Sensor.objects.filter(sensor_id = val[2])
+                    version = int(val[3])
+                    data = SensorGenData.objects.filter(sensor = sns[0], version_id = version)
+
+                    sg = sns[0].sg.sg_name
+
+                    lst = []
+
+                    value = {
+                            'x' : (data[0].from_time).strftime('%Y-%m-%d %H:%M:%S'),
+                            'y' : data[0].from_data
+                        }
+                    
+                    lst.append(value)
+
+                    for point in data:
+                        value = {
+                            'x' : (point.to_time).strftime('%Y-%m-%d %H:%M:%S'),
+                            'y' : point.to_data
+                        }
+
+                        lst.append(value)
+
+                    obj = {
+                        'label' : sns[0].sensor_name + " " + str(version),
+                        'data' : lst,
+                        'parent' : sg 
                     }
 
                     data_list.append(obj)
@@ -438,10 +644,17 @@ def dataGen(request):
         #print(request.session['user'])
 
         user = Users.objects.filter(username=request.session['user']) 
-        org = user[0].org       
+        org = user[0].org     
+        user_loc = (user[0].loc)     
 
         # Location list
-        locations = Location.objects.filter(org=org)
+        if user[0].position=="org_admin":
+            locations = Location.objects.filter(org=org)
+
+        else:
+            locations = Location.objects.filter(loc_id=user_loc.loc_id)
+
+        # print("Location id of user is :" , user_loc.loc_name)
 
         mapper={
             'locations':locations,
@@ -480,6 +693,34 @@ def saveGenData(data, sensor):
 
     return current
 
+# Function to redirect to saved data page
+def savedData(request):
+    if 'user' in request.session:
+        #print(request.session['user'])
+
+        user = Users.objects.filter(username=request.session['user']) 
+        org = user[0].org 
+        user_loc = (user[0].loc)     
+
+        # Location list
+        if user[0].position=="org_admin":
+            locations = Location.objects.filter(org=org)
+
+        else:
+            locations = Location.objects.filter(loc_id=user_loc.loc_id)
+
+        # print("Location id of user is :" , user_loc.loc_name)
+
+        mapper={
+            'locations':locations,
+            'heading':'Data Retrieval Portal',
+            'display':'block'
+        }
+        return render(request,'savedData.html',mapper)
+    else:
+        return HttpResponseRedirect("/")
+
+
 # Function to create user generated graph for option 1
 @csrf_exempt
 def option_1_graph(request):
@@ -498,6 +739,8 @@ def option_1_graph(request):
                 values = sensors_data[0].split(',')
                 sensor = Sensor.objects.filter(sensor_id = values[2])
                 name = sensor[0].sensor_name
+
+                sg = sensor[0].sg.sg_name
 
                 # Divide the data equally for the given time interval
                 length = len(sensors_data)
@@ -525,7 +768,8 @@ def option_1_graph(request):
 
                 obj = {
                     'label' : name,
-                    'data' : lst 
+                    'data' : lst ,
+                    'parent' : sg
                 }
 
                 data_list.append(obj)
@@ -611,6 +855,8 @@ def option_2_graph(request):
                 sensor = Sensor.objects.filter(sensor_id = values[2])
                 name = sensor[0].sensor_name
 
+                sg = sensor[0].sg.sg_name
+
                 # Create data points with corresponding time
                 lst = []
                 for point in sensors_data:
@@ -626,7 +872,8 @@ def option_2_graph(request):
 
                 obj = {
                     'label' : name,
-                    'data' : lst 
+                    'data' : lst ,
+                    'parent': sg
                 }
 
                 data_list.append(obj)
@@ -687,6 +934,7 @@ def option_3_graph(request):
         sensors_data = (json.loads(request.POST['values']))["data"]
         timestamps = (json.loads(request.POST['timestamp']))["data"]
         name = request.POST["name"]
+        parent = request.POST["grp_name"]
 
         # Initialise the return list
         data_list = []
@@ -708,7 +956,8 @@ def option_3_graph(request):
 
                 obj = {
                     'label' : name,
-                    'data' : lst 
+                    'data' : lst,
+                    'parent' : parent
                 }
 
                 data_list.append(obj)
@@ -762,13 +1011,14 @@ def option_3_insert_db(request):
         return JsonResponse(version_id , safe=False)
 
 
-# Function to create user generated graph for option 3
+# Function to create user generated graph for option 4
 @csrf_exempt
 def option_4_graph(request):
     if request.method=="POST":
         sensors_data = (json.loads(request.POST['values']))["data"]
         timestamps = (json.loads(request.POST['timestamp']))["data"]
         name = request.POST["name"]
+        parent = request.POST["grp_name"]
 
         # Initialise the return list
         data_list = []
@@ -790,7 +1040,8 @@ def option_4_graph(request):
 
                 obj = {
                     'label' : name,
-                    'data' : lst 
+                    'data' : lst ,
+                    'parent': parent
                 }
 
                 data_list.append(obj)
@@ -806,17 +1057,17 @@ def num_unique(data):
     return len(set(data))
 
 def mean_val(data):
-    return round(numpy.mean(data), 2)
+    return round(np.mean(data), 2)
 
 def quartile_val(data, num):
-    return round(numpy.percentile(data, num), 2)
+    return round(np.percentile(data, num), 2)
 
 def mode_val(data):
     print((stats.mode(data)).mode[0])
     return int((stats.mode(data)).mode[0])
 
 def std_val(data):
-    return round(numpy.std(data), 2)
+    return round(np.std(data), 2)
 
 @csrf_exempt
 def getStatistics(request):
@@ -850,7 +1101,7 @@ def getStatistics(request):
             # print(len(sensor['data']))
 
             # Calculate unique values
-            data_points = [ int(data['y']) for data in sensor['data'] ]
+            data_points = [ int(float(data['y'])) for data in sensor['data'] ]
             # print(data_points)
             data_list[0]['unique'].append(num_unique(data_points))
 
@@ -926,6 +1177,218 @@ def movingAvg(array, count):
 
     return result
    
+def split_array(arr, window):
+    split_arr = []
+
+    i = 0
+    while((i+window)<=len(arr)):
+        split_arr.append(arr[i:i+window])
+        i = i + window
+
+    return split_arr
+
+@csrf_exempt
+def getMotifs(request):
+    if request.method == "POST":
+        sensors_data = json.loads(request.POST['sensors_data']) 
+        percent = int(json.loads(request.POST['window']))
+        cutoff = float(json.loads(request.POST['cutoff']))
+        occur = int(json.loads(request.POST['occur']))
+        # percent = int(request.POST["percent"])
+
+        print("Percent : ", percent)
+
+        # Initialise the return list
+        data_list = []
+
+        for sensor in sensors_data:
+            
+            label = sensor['label']
+            
+            data_points = [ int(float(data['y'])) for data in sensor['data'] ]
+
+            time_points = [ (data['x']) for data in sensor['data'] ]
+
+            window = int(len(data_points)*percent//100)
+
+            # threshold = 3
+
+            split_points = split_array(data_points, window)
+
+            split_time = split_array(time_points, window)
+
+            flag = [0] * len(split_points)
+
+            similar_objs = []
+            time_intervals = []
+            
+            count = 0
+
+            for i in range(0, len(split_points)):
+
+                if not flag[i]:
+
+                    new_list = [i]
+                    new_interval = [(split_time[i][0], split_time[i][window-1])]
+
+                    for j in range(i+1, len(split_points)):
+
+                        if not flag[j]:
+                            # Pearson's Correlation
+                            corr, _ = pearsonr(split_points[i], split_points[j])
+
+                            if corr > cutoff:
+
+                                new_list.append(j)
+                                new_interval.append((split_time[j][0], split_time[j][window-1]))
+                                # no. of repetitions w.r.t i, points of window i 
+                                # similar_objs[i] = j
+
+                                flag[j] = 1
+
+                    if len(new_list)>=occur:
+                        similar_objs.append(new_list)
+                        time_intervals.append(new_interval)
+
+                    flag[i] = 1
+
+
+            for i in range(len(similar_objs)):
+
+                window_data = split_points[similar_objs[i][0]]
+
+                # Create data points with corresponding time
+                lst = []
+
+                for j in range(1, len(window_data)+1):
+                    time = j #datetime.strptime(timestamps[i], '%Y-%m-%d %H:%M:%S')
+                    value = {
+                        'x' : str(time),
+                        'y' : str(window_data[j-1])
+                    }
+
+                    lst.append(value)
+
+                obj = {
+                    'label' : label + '_' + str(i+1),
+                    'data' : lst,
+                    'repititions' : len(similar_objs[i]),
+                    'intervals' : time_intervals[i]
+                }
+
+                data_list.append(obj)
+
+            
+        return JsonResponse(list(data_list) , safe=False)
+
+@csrf_exempt
+def getFourierCoefficients(request):
+
+    if request.method == "POST":
+        sensors_data = json.loads(request.POST['sensors_data']) 
+        # print(sensors_data)
+        
+        # Initialise the return list
+        data_list = [{
+            'Coefficient 1' : [],
+            'Coefficient 2' : [],
+            'Coefficient 3' : [],
+            'Coefficient 4' : [],
+            'Coefficient 5' : []
+        }]
+
+        # For each sensor in the list of data
+        for sensor in sensors_data:
+
+            data_points = [ int(float(data['y'])) for data in sensor['data'] ]
+
+            points = np.array(data_points)
+
+            coefficients = np.fft.fft(points)
+
+            coefficients = np.around(coefficients, 4)
+
+            # print(data_points)
+            data_list[0]['Coefficient 1'].append(str(coefficients[0]))
+
+            data_list[0]['Coefficient 2'].append(str(coefficients[1]))
+            
+            data_list[0]['Coefficient 3'].append(str(coefficients[2]))
+
+            data_list[0]['Coefficient 4'].append(str(coefficients[3]))
+
+            data_list[0]['Coefficient 5'].append(str(coefficients[4]))
+
+        print(data_list)
+        
+        # Converting the list to a particular format
+        result = [list(data_list[0].keys())]
+        
+        for i in range(len(sensors_data)):
+            new_row = []
+
+            new_row.append(data_list[0]['Coefficient 1'][i])
+            new_row.append(data_list[0]['Coefficient 2'][i])
+            new_row.append(data_list[0]['Coefficient 3'][i])
+            new_row.append(data_list[0]['Coefficient 4'][i])
+            new_row.append(data_list[0]['Coefficient 5'][i])
+
+            result.append(new_row)
+
+        print(result)
+
+        return JsonResponse(list(result) , safe=False)
+
+@csrf_exempt
+def getCorrMatrix(request):
+
+    if request.method == "POST":
+        sensors_data = json.loads(request.POST['sensors_data']) 
+        # print(sensors_data)
+        
+        # Initialise the return list
+        data_list = [{
+            'titles' : []
+        }]
+
+        # Initialise matrix
+        sns_names = []
+        for sensor in sensors_data:
+            # data_list[0]["titles"].append(sensor['label'])
+            # data_list[0][sensor['label']] = []
+            sns_names.append(sensor['parent'] + ' | ' + sensor['label'])
+
+
+        # Converting the list to a particular format
+        result = [["Titles"] + sns_names]
+        
+        for i in range(len(sensors_data)):
+            new_row = []
+
+            new_row.append(sns_names[i])
+
+            x_data = [ int(float(data['y'])) for data in sensors_data[i]['data'] ]
+
+            for j in range(0,i):
+                new_row.append(result[j+1][i+1])
+
+            new_row.append(1)
+
+            for j in range(i+1,len(sensors_data)):
+
+                y_data = [ int(float(data['y'])) for data in sensors_data[j]['data'] ]
+
+                # Pearson's Correlation
+                corr, _ = pearsonr(x_data, y_data)
+
+                new_row.append(corr)
+
+            result.append(new_row)
+
+        print(result)
+
+        return JsonResponse(list(result) , safe=False)
+
 
 @csrf_exempt
 def getADFT(request):
@@ -948,3 +1411,224 @@ def getADFT(request):
         return response
 
     return JsonResponse(adfuller(data) , safe=False)
+
+# Add/Edit Page render
+def add_edit(request):
+    if 'user' in request.session:
+        #print(request.session['user'])
+
+        user = Users.objects.filter(username=request.session['user']) 
+        org = user[0].org     
+        user_loc = (user[0].loc)     
+
+        # Location list
+        if user[0].position=="org_admin":
+            locations = Location.objects.filter(org=org)
+
+        else:
+            locations = Location.objects.filter(loc_id=user_loc.loc_id)
+
+        # print("Location id of user is :" , user_loc.loc_name)
+
+        mapper={
+            'locations':locations,
+            'heading':'Organization Hierarchy',
+            'display':'block'
+        }
+        return render(request,'add_edit.html',mapper)
+    else:
+        return HttpResponseRedirect("/")
+
+# Render Org Chart
+@csrf_exempt
+def renderOrgChart(request):
+    message = "Chart Rendered!"
+    print(message)
+
+    # Initialise the return list
+    data_list = [{'nodeBinding': {
+                        'field_0': "name"
+                    }
+                }]
+
+    data_list[0]['nodes'] = []
+
+
+    # Variables
+    id = 1
+    pid = 1
+
+    user = Users.objects.filter(username=request.session['user']) 
+
+    # Organisation
+    org = user[0].org  
+
+    obj = {
+        'id': id,
+        'name': org.org_name,
+        'type': "org",
+        'db_id': org.org_id
+    }
+
+    data_list[0]['nodes'].append(obj)
+
+    id = id + 1
+
+    # Location list
+    locations = Location.objects.filter(org=org)
+
+    # Loop for every location
+    for location in locations:
+
+        obj = {
+            'id': id,
+            'pid': pid,
+            'name': location.loc_name,
+            'type': "loc",
+            'db_id': location.loc_id
+        }
+
+        data_list[0]['nodes'].append(obj)
+
+        sg_pid = id
+
+        id = id + 1
+
+        sgs = SensorGroup.objects.filter(loc=location)
+
+        # Loop for every Sg
+        for sg in sgs:
+
+            obj = {
+                'id': id,
+                'pid': sg_pid,
+                'name': sg.sg_name,
+                'type': "sg",
+                'db_id': sg.sg_id
+            }
+
+            data_list[0]['nodes'].append(obj)
+
+            sns_pid = id
+
+            id = id + 1
+
+            sensors = Sensor.objects.filter(sg=sg)
+
+            # Loop for every Sensor
+            for sensor in sensors:
+
+                obj = {
+                    'id': id,
+                    'pid': sns_pid,
+                    'name': sensor.sensor_name,
+                    'type': "loc",
+                    'db_id': sensor.sensor_id
+                }
+
+                data_list[0]['nodes'].append(obj)
+
+                id = id + 1
+
+    
+    return JsonResponse(list(data_list) , safe=False)
+
+    return JsonResponse(message , safe=False)
+
+# Render Org Chart
+@csrf_exempt
+def renderOrgChart2(request):
+    message = "Chart Rendered!"
+    print(message)
+
+    # Initialise the return list
+    data_list = []
+
+    # data_list[0]['nodes'] = []
+
+
+    # Variables
+    id = 1
+    pid = 1
+
+    user = Users.objects.filter(username=request.session['user']) 
+
+    # Organisation
+    org = user[0].org  
+    pid_name = org.org_name
+    obj = [ {'v': org.org_name, 'f':'<div class=org_head>' + org.org_name + '</div>'}, '', '']
+    # {
+    #     'id': id,
+    #     'name': org.org_name,
+    #     'type': "org",
+    #     'db_id': org.org_id
+    # }
+
+    data_list.append(obj)
+
+    id = id + 1
+
+    # Location list
+    locations = Location.objects.filter(org=org)
+
+    # Loop for every location
+    for location in locations:
+
+        obj = [{'v': location.loc_name, 'f':'<div class=location>' + location.loc_name + '</div>'}, pid_name, 'id : ' + str(location.loc_id)]
+
+        # obj = {
+        #     'id': id,
+        #     'pid': pid,
+        #     'name': location.loc_name,
+        #     'type': "loc",
+        #     'db_id': location.loc_id
+        # }
+
+        data_list.append(obj)
+
+        sg_pid = id
+        sg_pid_name = location.loc_name
+
+        id = id + 1
+
+        sgs = SensorGroup.objects.filter(loc=location)
+
+        # Loop for every Sg
+        for sg in sgs:
+
+            obj = [{'v': str(sg.sg_id) + '_' + sg.sg_name, 'f':'<div class=sns_grp>' + str(sg.sg_id) + '_' + sg.sg_name + '</div>'}, sg_pid_name, 'id : ' + str(sg.sg_id)]
+            # obj = {
+            #     'id': id,
+            #     'pid': sg_pid,
+            #     'name': sg.sg_name,
+            #     'type': "sg",
+            #     'db_id': sg.sg_id
+            # }
+
+            data_list.append(obj)
+
+            sns_pid = id
+            sns_pid_name = str(sg.sg_id) + '_' + sg.sg_name
+
+            id = id + 1
+
+            sensors = Sensor.objects.filter(sg=sg)
+
+            # Loop for every Sensor
+            for sensor in sensors:
+
+                obj = [{'v': str(sensor.sensor_id) + '_' + sensor.sensor_name, 'f':'<div class=sns>' + str(sensor.sensor_id) + '_' + sensor.sensor_name + '</div>'}, sns_pid_name, 'id : ' + str(sensor.sensor_id)]
+                # obj = {
+                #     'id': id,
+                #     'pid': sns_pid,
+                #     'name': sensor.sensor_name,
+                #     'type': "loc",
+                #     'db_id': sensor.sensor_id
+                # }
+
+                data_list.append(obj)
+
+                id = id + 1
+
+    print(data_list)
+    return JsonResponse(list(data_list) , safe=False)
